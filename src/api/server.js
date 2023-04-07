@@ -1,6 +1,5 @@
 import express from 'express';
 import bodyParser from 'body-parser';
-import jsonwebtoken from 'jsonwebtoken';
 import { route } from './route/index.js';
 
 const app = express();

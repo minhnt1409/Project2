@@ -37,14 +37,11 @@ var checkVerifyCode = (verifyCode) => {
 }
 
 // check user_name
-var checkUserName = (userName) => {
-  return new Promise((resolve, reject) => {
-    if (userName.length == 0) reject('lỗi xâu rỗng');
-    let str = removeAccents(userName);
-    var regex = /^[a-zA-Z][a-zA-Z_ ]*$/;
-    if (regex.test(str)) resolve(userName);
-    else reject('phải bắt đầu là chữ, tiếp theo là chữ hoặc gạch dưới hoặc khoảng trắng')
-  })
+const checkUserName = (userName) => {
+  if (userName.length == 0 || userName.length < 6 || userName > 18) return false;
+  var regex = /^[a-zA-Z0-9]*$/;
+  if (!regex.test(userName)) return false;
+  return true;
 }
 
 // check link
