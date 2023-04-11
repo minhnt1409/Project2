@@ -1,0 +1,47 @@
+- comment.js
+	9) xem bình luận (của người chơi gửi cho quản trị của phòng và các người chơi khác xem được bình luận này): get_comments
+	10) gửi bình luận (người chơi gửi cho quản trị của phòng và các người chơi khác xem được bình luận này): set_comment. Chú ý không cho phép bình luận các bình luận,không bày tỏ cảm xúc cho bình luận
+	
+- notification.js
+	16) xem danh sách thiết lập thông báo: get_push_settings
+	17) thiết lập thông báo: set_push_settings
+	19) xem danh sách các mail từ một người chơi khác: get_list_conversation
+	20) xem danh sách các mail mới nhất từ mọi người chơi còn lại:get_conversation_detail
+	21) xoá danh sách các mail từ một người chơi khác: delete_conversation
+	22) xoá một mail từ một người chơi khác: delete_message
+	23) lấy được thông báo từ hệ thống: get_notification
+	24) thiết lập đã đọc được mail: set_read_notification
+	25) thiết lập đã đọc được thông báo: set_read_message
+	
+- room.js
+	5) lấy danh sách các phòng: get_list_rooms
+	6) lấy thông tin của một phòng: get_room
+	7) thêm phòng: add_room (chỉ dành cho admin)
+	8) sửa phòng: edit_room (chỉ dành cho admin)
+	
+- users.js
+	1) đăng ký tài khoản: signup
+	2) đăng nhập: login
+	3) đăng xuất: logout
+	4) thay đổi thông tin sau đăng ký: change_info_after_signup
+	13) xem thông tin cá nhân của người chơi: get_user_info
+	18) đổi mật khẩu: change_password
+	
+- util.js
+	11) báo cáo: report (báo cáo bình luận, báo cáo phòng và báo cáo người chơi)
+	12) tìm kiếm: search (tìm kiếm bình luận, tìm kiếm phòng và tìm kiếm người chơi)
+	14) chặn người chơi (chỉ dành cho admin): set_block
+	15) xem danh sách bị chặn (chỉ dành cho admin): get_list_block
+	26) lấy điểm của người chơi: get_score
+	27) lấy chi tiết điểm của người chơi: get_score_detail (sẽ trao đổi thêm)
+	28) gửi thông tin tọa độ: update_position
+	29) Lấy danh sách nhiệm vụ: get_list_task
+	30) lấy form khảo sát: get_survey
+	31) submit khảo sát: submit_survey
+
+Trên đây là phân bố API vào các file tương ứng ạ.
+Minh: 1-8
+anh N.Anh: 9-16
+anh Đạt: 17-24
+anh Đông: 25-31
+ 
