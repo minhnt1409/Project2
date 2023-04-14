@@ -1,20 +1,20 @@
 import express, { response } from 'express';
 import bcryptjs from 'bcryptjs';
 import jsonwebtoken from 'jsonwebtoken';
-// import { v4 } from 'uuid';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 import validInput from '../utils/validInput.js';
-import responseError from '../response/response.js';
-import { callRes } from '../response/response.js';
+import responseError, { callRes } from '../response/response.js';
 
 // Import database connection
 import connection from '../../db/connect.js';
+import { log } from 'console';
 
 const router = express.Router();
 
 const JWT_SECRET = 'maBiMat';
+
 // API đăng ký
 router.post('/signup', async (req, res) => {
     const { password } = req.body;
@@ -30,14 +30,13 @@ router.post('/signup', async (req, res) => {
         return callRes(res, responseError.PARAMETER_VALUE_IS_INVALID, null);
     }
     try {
-        let data = null;
         connection.query('SELECT * FROM users WHERE username = ?', [username], (error, results) => {
             if (error) return callRes(res, responseError.UNKNOWN_ERROR, null);
             if (results.length > 0) return callRes(res, responseError.USER_EXISTED, null);
             bcryptjs.hash(password, 10).then(hashedPassword => {
-                connection.query('INSERT INTO users SET ?', { username, password: hashedPassword }, (error) => {
+                connection.query('INSERT INTO users (username, password) VALUE (?, ?)', [ username,hashedPassword ], (error) => {
                     if (error) return callRes(res, responseError.UNKNOWN_ERROR, null);
-                    return callRes(res, responseError.OK, data);
+                    return callRes(res, responseError.OK, null);
                 });
             });
         });
@@ -45,8 +44,9 @@ router.post('/signup', async (req, res) => {
         return callRes(res, responseError.UNKNOWN_ERROR, error.message);
     }
 });
+
 //API đăng nhập
-router.post('/login', (req, res) => {
+router.post('/login', async (req, res) => {
     const { username, password, uuid } = req.body;
 
     if(!username  || !password || !uuid) return callRes(res, responseError.PARAMETER_IS_NOT_ENOUGH, null);
@@ -57,23 +57,20 @@ router.post('/login', (req, res) => {
     connection.query(sql, [username], (err, results) => {
         if (err) return callRes(res, responseError.UNKNOWN_ERROR, null);
         if (results.length === 0) return callRes(res, responseError.USER_IS_NOT_VALIDATED, null);
-
+        
         bcryptjs.compare(password, results[0].password, (err, result) => {
             if (err) return callRes(res, responseError.UNKNOWN_ERROR, null);
             if (result) {
                 const token = jsonwebtoken.sign(
                     {
                         username: results[0].username,
-                        userId: results[0].id
+                        userId: results[0].id,
+                        uuid: uuid
                     },
-                    JWT_SECRET,
-                    {
-                        expiresIn: '1h'
-                    }
+                    JWT_SECRET
                 );
-                // const newUuid = uuid.v4();
-                const updateSql = 'UPDATE users SET uuid = ? WHERE id = ?';
-                connection.query(updateSql, [uuid, results[0].id], (err, updateResult) => {
+                const updateSql = 'UPDATE users SET token = ? WHERE id = ?';
+                connection.query(updateSql, [token, results[0].id], (err, updateResult) => {
                     if (err) {
                         return callRes(res, responseError.UNKNOWN_ERROR, null);
                     }
@@ -90,8 +87,9 @@ router.post('/login', (req, res) => {
         });
     });
 });
+
 // API đăng xuất
-router.post('/logout', (req, res) => {
+router.post('/logout', async (req, res) => {
     const token = req.body.token;
 
     // Kiểm tra token có tồn tại hay không
@@ -99,11 +97,13 @@ router.post('/logout', (req, res) => {
 
     // Xác thực và giải mã token
     try {
-        const decoded = jwt.verify(token, JWT_SECRET);
-        const userId = decoded.id;
+        const decoded = jsonwebtoken.verify(token, JWT_SECRET);
+        console.log(decoded);
+        const userId = decoded.userId;
+        console.log(userId);
 
         // Xóa token trong cơ sở dữ liệu
-        connection.query('DELETE FROM tokens WHERE user_id = ?', userId, (error, result) => {
+        connection.query('UPDATE users SET token = NULL WHERE id = ?', userId, (error, result) => {
             if (error) return callRes(res, responseError.UNKNOWN_ERROR, null);
             // Trả về thông báo thành công
             return callRes(res, responseError.OK, null);
@@ -113,14 +113,13 @@ router.post('/logout', (req, res) => {
     }
 });
 
-
 // Set up multer for file upload
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, 'public/images');
+        cb(null, '.../public/img');
     },
     filename: function (req, file, cb) {
-        const fileName = `${uuid.v4()}${path.extname(file.originalname)}`;
+        const fileName = 'avatar-' + `${uuid.v4()}${path.extname(file.originalname)}`;
         cb(null, fileName);
     },
 });
@@ -130,10 +129,11 @@ const upload = multer({
 });
 
 // API cập nhật thông tin người dùng đã đăng nhập
-router.put('/change_info_after_signup/us', upload.single('avatar'), async (req, res) => {
+router.put('/change_info_after_signup', async (req, res) => {
     try {
         const { username, email } = req.body;
         let avatar;
+        console.log(req.body);
         if (req.file) {
             avatar = `/images/${req.file.filename}`;
         } else return callRes(res, responseError.UPLOAD_FILE_FAILED, null);
@@ -160,103 +160,6 @@ router.put('/change_info_after_signup/us', upload.single('avatar'), async (req, 
         console.log(err);
         callRes(res, responseError.UNKNOWN_ERROR, null);
     }
-});
-// Api lấy danh sách phòng
-router.get('/get_list_rooms', (req, res) => {
-    const token = req.body.token;
-    const index = parseInt(req.body.index || 0);
-    const count = parseInt(req.body.count || 20);
-
-    // kiểm tra token
-    if (!token) return callRes(res, responseError.PARAMETER_VALUE_IS_INVALID, null);
-
-    // truy vấn cơ sở dữ liệu
-    connection.query(`SELECT * FROM rooms LIMIT ${index}, ${count}`, (err, results) => {
-        if (err) return callRes(res, responseError.UNKNOWN_ERROR, null);
-        const rooms = results.map(room => ({ room_id: room.room_id, room_name: room.room_name, players: room.players }));
-        let data = { rooms: rooms };
-        return callRes(res, responseError.OK, data);
-    });
-});
-// Api lấy thông tin phòng
-router.get('/get_room', (req, res) => {
-    const room_id = req.body.room_id;
-    const query = `SELECT * FROM rooms WHERE room_id = ${room_id}`;
-
-    connection.query(query, function (error, results, fields) {
-        if (error) return callRes(res, responseError.UNKNOWN_ERROR, null);
-        callRes(res, responseError.OK, results[0]);
-    });
-});
-// Api thêm phòng chỉ dành cho quản trị viên
-router.post('/add_room', (req, res) => {
-    const { token, room_name, max } = req.body;
-
-    if (!token || !room_name) return callRes(res, responseError.PARAMETER_VALUE_IS_INVALID, null);
-
-    // Kiểm tra xác thực token của admin
-    const adminQueryString = `SELECT * FROM admins WHERE token = '${token}'`;
-
-    connection.query(adminQueryString, (err, adminRows, fields) => {
-        if (err) return callRes(res, responseError.UNKNOWN_ERROR, null);
-        if (adminRows.length > 0) {
-            // Thêm phòng mới vào database
-            const createRoomQueryString = `INSERT INTO rooms (room_name, max) VALUES ('${room_name}', '${max}')`;
-
-            connection.query(createRoomQueryString, (err, roomRows, fields) => {
-                if (err) return callRes(res, responseError.UNKNOWN_ERROR, null);
-
-                // Trả về thông tin phòng mới được tạo
-                const room_id = roomRows.insertId;
-                const getRoomQueryString = `SELECT * FROM rooms WHERE room_id = '${room_id}'`;
-
-                connection.query(getRoomQueryString, (err, rows, fields) => {
-                    if (err) return callRes(res, responseError.UNKNOWN_ERROR, null);
-
-                    if (rows.length > 0) return callRes(res, responseError.OK, rows[0]);
-                    else return callRes(res, responseError.UNKNOWN_ERROR, null);
-                });
-            });
-        } else return callRes(res, responseError.TOKEN_IS_INVALID, null);
-    });
-});
-// Api sửa phòng chỉ dành cho admin
-router.put('/edit_room', (req, res) => {
-    const { room_id,token, room_name, max } = req.body;
-
-    // Kiểm tra xem value có hợp lệ hay không
-    if(!token || !room_id) return callRes(res, responseError.PARAMETER_VALUE_IS_INVALID,null);
-    if(!room_name && !max) return callRes(res, responseError.PARAMETER_VALUE_IS_INVALID,null);
-
-    // Thực hiện cập nhật thông tin phòng trong cơ sở dữ liệu
-    let sql = 'UPDATE rooms SET ';
-    let params = [];
-
-    if (room_name) {
-        sql += 'room_name = ?, ';
-        params.push(room_name);
-    }
-
-    if (max) {
-        sql += 'max = ?, ';
-        params.push(max);
-    }
-
-    sql = sql.slice(0, -2);
-    sql += ' WHERE room_id = ?';
-    params.push(room_id);
-
-    connection.query(sql, params, (err, result) => {
-        if (err) return callRes(res, responseError.UNKNOWN_ERROR,null);
-
-        if (result.affectedRows == 0) return callRes(res, responseError.NO_DATA_OR_END_OF_LIST_DATA,null);
-        let data = {
-            room_name : room_name,
-            max : max,
-            room_id : room_id
-        }
-        return callRes(res, responseError.OK, data);
-    });
 });
 
 export { router };

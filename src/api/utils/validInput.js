@@ -38,7 +38,7 @@ var checkVerifyCode = (verifyCode) => {
 
 // check user_name
 const checkUserName = (userName) => {
-  if (userName.length == 0 || userName.length < 6 || userName > 18) return false;
+  if (userName.length == 0 || userName.length < 4 || userName > 18) return false;
   var regex = /^[a-zA-Z0-9]*$/;
   if (!regex.test(userName)) return false;
   return true;
