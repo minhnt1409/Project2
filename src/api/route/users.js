@@ -133,9 +133,17 @@ router.put('/change_info_after_signup', upload.single('avatar'), async (req, res
     try {
         const { token, username, email } = req.body;
         let avatar;
-        console.log(req.file);
         if (req.file) {
+            if (!validInput.checkImageFile(req.file)) return callRes(res, responseError.PARAMETER_VALUE_IS_INVALID, null);
             avatar = req.file.filename;
+        }
+        if(username) {
+            if (!validInput.checkUserName(username)) return callRes(res, responseError.PARAMETER_VALUE_IS_INVALID, null);
+            if(typeof username === 'string') return callRes(res, responseError.PARAMETER_TYPE_IS_INVALID,null);
+        } 
+        if(email) {
+            if (!validInput.checkEmail(email)) return callRes(res, responseError.PARAMETER_VALUE_IS_INVALID, null);
+            if(typeof email === 'string') return callRes(res, responseError.PARAMETER_TYPE_IS_INVALID,null);
         }
 
         // Xác thực và giải mã token
@@ -146,7 +154,7 @@ router.put('/change_info_after_signup', upload.single('avatar'), async (req, res
             console.log(username);
 
             // Check if the new username is already taken
-            const usernameExists = await connection.promise().query(`SELECT * FROM users WHERE username = '${username}' AND id <> ${userId}`);
+            const usernameExists = await connection.promise().query(`SELECT * FROM users WHERE username = '${username}'`);
             if (usernameExists[0].length) {
                 return callRes(res, responseError.USER_EXISTED, null);
             }

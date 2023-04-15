@@ -1,6 +1,7 @@
 import express, { response } from 'express';
 import bcryptjs from 'bcryptjs';
 import jsonwebtoken from 'jsonwebtoken';
+import moment from 'moment';
 // import { v4 } from 'uuid';
 import multer from 'multer';
 import path from 'path';
@@ -14,6 +15,7 @@ import connection from '../../db/connect.js';
 const router = express.Router();
 
 const JWT_SECRET = 'maBiMat';
+const now = moment(); // Lấy ra đối tượng moment hiện tại
 
 // Api lấy danh sách phòng
 router.get('/get_list_rooms', async (req, res) => {
@@ -22,7 +24,7 @@ router.get('/get_list_rooms', async (req, res) => {
     const count = parseInt(req.body.count || 20);
 
     // kiểm tra token
-    if (!token) return callRes(res, responseError.PARAMETER_VALUE_IS_INVALID, null);
+    if (!token) return callRes(res, responseError.PARAMETER_IS_NOT_ENOUGH, null);
 
     // truy vấn cơ sở dữ liệu
     connection.query(`SELECT * FROM rooms LIMIT ${index}, ${count}`, (err, results) => {
@@ -59,9 +61,9 @@ router.post('/add_room', async (req, res) => {
             if (results.length === 0) return callRes(res, responseError.USER_IS_NOT_VALIDATED, null);
             if (results[0].role === 'admin') {
                 // Thêm phòng mới vào database
-                const createRoomQueryString = `INSERT INTO rooms (room_name,current, max, speed, author_id) VALUE (?, ?, ?, ?, ?)`;
+                const createRoomQueryString = `INSERT INTO rooms (room_name, max, author_id, created) VALUE (?, ?, ?, ?)`;
                 
-                connection.query(createRoomQueryString, [room_name, 1, max, 1, decoded.userId], (err, Room, fields) => {
+                connection.query(createRoomQueryString, [room_name, max, decoded.userId, now.format('YYYY-MM-DD HH:mm:ss')], (err, Room, fields) => {
                     console.log(err);
                     if (err) return callRes(res, responseError.UNKNOWN_ERROR, null);
     
@@ -83,7 +85,8 @@ router.post('/add_room', async (req, res) => {
                                     username : decoded.username,
                                     id : decoded.userId
                                 },
-                                created : rows[0].created
+                                created : rows[0].created,
+                                modified : rows[0].modified
                             }
                             return callRes(res, responseError.OK, data);
                         }
@@ -131,10 +134,11 @@ router.put('/edit_room', async (req, res) => {
                 }
             
                 sql = sql.slice(0, -2);
-                sql += ' WHERE room_id = ?';
+                sql += `, modified = '${now.format('YYYY-MM-DD HH:mm:ss')}' WHERE room_id = ?`;
                 params.push(room_id);
             
                 connection.query(sql, params, (err, result) => {
+                    console.log(err);
                     if (err) return callRes(res, responseError.UNKNOWN_ERROR,null);
             
                     if (result.affectedRows == 0) return callRes(res, responseError.NO_DATA_OR_END_OF_LIST_DATA,null);
