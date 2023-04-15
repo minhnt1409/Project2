@@ -2,6 +2,7 @@ import express, { response } from 'express';
 import bcryptjs from 'bcryptjs';
 import jsonwebtoken from 'jsonwebtoken';
 import multer from 'multer';
+import { v4 as uuidv4 } from 'uuid';
 import path from 'path';
 import fs from 'fs';
 import validInput from '../utils/validInput.js';
@@ -9,7 +10,6 @@ import responseError, { callRes } from '../response/response.js';
 
 // Import database connection
 import connection from '../../db/connect.js';
-import { log } from 'console';
 
 const router = express.Router();
 
@@ -65,7 +65,7 @@ router.post('/login', async (req, res) => {
                     {
                         username: results[0].username,
                         userId: results[0].id,
-                        uuid: uuid
+                        uuid: uuid // uuid: 50-81-40-85-D1-9C
                     },
                     JWT_SECRET
                 );
@@ -116,10 +116,10 @@ router.post('/logout', async (req, res) => {
 // Set up multer for file upload
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, '.../public/img');
+        cb(null, './src/public/img');
     },
     filename: function (req, file, cb) {
-        const fileName = 'avatar-' + `${uuid.v4()}${path.extname(file.originalname)}`;
+        const fileName = 'avatar-' + `${uuidv4()}${path.extname(file.originalname)}`;
         cb(null, fileName);
     },
 });
@@ -129,33 +129,44 @@ const upload = multer({
 });
 
 // API cập nhật thông tin người dùng đã đăng nhập
-router.put('/change_info_after_signup', async (req, res) => {
+router.put('/change_info_after_signup', upload.single('avatar'), async (req, res) => {
     try {
-        const { username, email } = req.body;
+        const { token, username, email } = req.body;
         let avatar;
-        console.log(req.body);
+        console.log(req.file);
         if (req.file) {
-            avatar = `/images/${req.file.filename}`;
-        } else return callRes(res, responseError.UPLOAD_FILE_FAILED, null);
-
-        const userId = req.user.id;
-
-        // Check if the new username is already taken
-        const usernameExists = await connection.promise().query(`SELECT * FROM users WHERE username = '${username}' AND id <> ${userId}`);
-        if (!usernameExists[0].length) {
-            return callRes(res, responseError.USER_EXISTED, null);
+            avatar = req.file.filename;
         }
 
-        // Update user info
-        await connection.promise().query(`UPDATE users SET username = '${username}', email = '${email}', avatar = '${avatar}' WHERE id = ${userId}`);
+        // Xác thực và giải mã token
+        try {
+            const decoded = jsonwebtoken.verify(token, JWT_SECRET);
+            console.log(decoded);
+            const userId = decoded.userId;
+            console.log(username);
 
-        // Get updated user info
-        const [rows] = await connection.promise().query(`SELECT * FROM users WHERE id = ${userId}`);
-        const user = rows[0];
-        delete user.password;
-
-        let data = { avatar: user.avatar }
-        callRes(res, responseError.OK, data);
+            // Check if the new username is already taken
+            const usernameExists = await connection.promise().query(`SELECT * FROM users WHERE username = '${username}' AND id <> ${userId}`);
+            if (usernameExists[0].length) {
+                return callRes(res, responseError.USER_EXISTED, null);
+            }
+    
+            // Update user info
+            if(username) await connection.promise().query(`UPDATE users SET username = '${username}' WHERE id = ${userId}`);
+            if(email) await connection.promise().query(`UPDATE users SET email = '${email}' WHERE id = ${userId}`);
+            if(avatar) await connection.promise().query(`UPDATE users SET avatar = '${avatar}' WHERE id = ${userId}`);
+    
+            // Get updated user info
+            const [rows] = await connection.promise().query(`SELECT * FROM users WHERE id = ${userId}`);
+            const user = rows[0];
+            delete user.password;
+    
+            let data = { avatar: user.avatar }
+            callRes(res, responseError.OK, data);
+        } catch (error) {
+            console.log(error);
+            return callRes(res, responseError.TOKEN_IS_INVALID, null);
+        }
     } catch (err) {
         console.log(err);
         callRes(res, responseError.UNKNOWN_ERROR, null);

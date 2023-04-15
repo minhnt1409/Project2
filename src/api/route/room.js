@@ -25,7 +25,7 @@ router.get('/get_list_rooms', async (req, res) => {
     // truy vấn cơ sở dữ liệu
     connection.query(`SELECT * FROM rooms LIMIT ${index}, ${count}`, (err, results) => {
         if (err) return callRes(res, responseError.UNKNOWN_ERROR, null);
-        const rooms = results.map(room => ({ room_id: room.room_id, room_name: room.room_name, players: room.players }));
+        const rooms = results.map(room => ({ room_id: room.room_id, room_name: room.room_name, players: room.current }));
         let data = { rooms: rooms };
         return callRes(res, responseError.OK, data);
     });
