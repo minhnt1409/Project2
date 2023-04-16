@@ -1,3 +1,5 @@
+Project II. NGUYỄN THÀNH MINH 20200409
+
 ## Run server
 ```
     $ npm install express mysql12 body-parser bcrypt jsonwebtoken uuid getmac multer moment
