@@ -48,11 +48,12 @@ router.post('/signup', async (req, res) => {
 //API đăng nhập
 router.post('/login', async (req, res) => {
     const { username, password, uuid } = req.body;
-
+    
     if(!username  || !password || !uuid) return callRes(res, responseError.PARAMETER_IS_NOT_ENOUGH, null);
-    if(typeof username != 'string' || typeof password != 'string' || typeof uuid != 'string') 
+    if(typeof username != 'string' || typeof password != 'string' || typeof uuid != 'string'){
         return callRes(res, responseError.PARAMETER_TYPE_IS_INVALID,null);
-
+    }
+    
     const sql = 'SELECT * FROM users WHERE username = ?';
     connection.query(sql, [username], (err, results) => {
         if (err) return callRes(res, responseError.UNKNOWN_ERROR, null);
@@ -83,7 +84,7 @@ router.post('/login', async (req, res) => {
                     }
                     return callRes(res, responseError.OK, data);
                 });
-            }
+            }else return callRes(res, responseError.PARAMETER_VALUE_IS_INVALID,null);
         });
     });
 });
@@ -139,11 +140,11 @@ router.put('/change_info_after_signup', upload.single('avatar'), async (req, res
         }
         if(username) {
             if (!validInput.checkUserName(username)) return callRes(res, responseError.PARAMETER_VALUE_IS_INVALID, null);
-            if(typeof username === 'string') return callRes(res, responseError.PARAMETER_TYPE_IS_INVALID,null);
+            if(typeof username != 'string') return callRes(res, responseError.PARAMETER_TYPE_IS_INVALID, null);
         } 
         if(email) {
             if (!validInput.checkEmail(email)) return callRes(res, responseError.PARAMETER_VALUE_IS_INVALID, null);
-            if(typeof email === 'string') return callRes(res, responseError.PARAMETER_TYPE_IS_INVALID,null);
+            if(typeof email != 'string') return callRes(res, responseError.PARAMETER_TYPE_IS_INVALID, null);
         }
 
         // Xác thực và giải mã token

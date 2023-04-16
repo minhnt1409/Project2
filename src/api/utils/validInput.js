@@ -57,8 +57,7 @@ const checkImageFile = (file) => {
   if (!file) return false;
 
   // Get the file extension
-  const extension = file.name.split('.').pop().toLowerCase();
-
+  const extension = file.originalname.split('.').pop().toLowerCase();
   // Check if the file extension is an image format
   const imageFormats = ['jpeg', 'jpg', 'png', 'gif', 'bmp'];
   if (!imageFormats.includes(extension)) return false;

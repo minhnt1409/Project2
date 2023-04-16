@@ -36,13 +36,42 @@ router.get('/get_list_rooms', async (req, res) => {
 });
 // Api lấy thông tin phòng
 router.get('/get_room', async (req, res) => {
-    const room_id = req.body.room_id;
-    const query = `SELECT * FROM rooms WHERE room_id = ${room_id}`;
+    const {token, room_id} = req.body;
+    if (!token || !room_id) return callRes(res, responseError.PARAMETER_IS_NOT_ENOUGH, null);
 
-    connection.query(query, function (error, results, fields) {
-        if (error) return callRes(res, responseError.UNKNOWN_ERROR, null);
-        callRes(res, responseError.OK, results[0]);
-    });
+    // Kiểm tra xác thực token của admin
+    try {
+        const decoded = jsonwebtoken.verify(token, JWT_SECRET);
+        console.log(decoded);
+        const userId = decoded.userId;
+        const sql = 'SELECT * FROM users WHERE id = ?';
+        connection.query(sql, [userId], (err, results) => {
+            if (err) return callRes(res, responseError.UNKNOWN_ERROR, null);
+            if (results.length === 0) return callRes(res, responseError.USER_IS_NOT_VALIDATED, null);
+            const query = `SELECT * FROM rooms WHERE room_id = ${room_id}`;
+        
+            connection.query(query, function (error, results, fields) {
+                if (error) return callRes(res, responseError.UNKNOWN_ERROR, null);
+                let data = {
+                    room_id : results[0].room_id,
+                    room_name : results[0].room_name,
+                    current : results[0].current,
+                    max : results[0].max,
+                    speed : results[0].speed,
+                    author : {
+                        username : decoded.username,
+                        id : decoded.userId
+                    },
+                    created : results[0].created,
+                    modified : results[0].modified
+                }
+                callRes(res, responseError.OK, data);
+            });
+        });
+    } catch (error) {
+        console.log(error);
+        return callRes(res, responseError.TOKEN_IS_INVALID, null);
+    }
 });
 // Api thêm phòng chỉ dành cho quản trị viên
 router.post('/add_room', async (req, res) => {
