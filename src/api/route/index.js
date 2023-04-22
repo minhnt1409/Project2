@@ -6,7 +6,7 @@ import { router as utilRouter } from './util.js';
 
 function route(app) {
 
-    app.use('/users', usersRouter);
+    app.use('/user', usersRouter);
     app.use('/room', roomRouter);
     app.use('/comment', commentRouter);
     app.use('/notification', notificationRouter);
