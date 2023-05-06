@@ -8,9 +8,8 @@
 
 ## Run server
 đổi user password và database trong file connect.js
-```
-    copy file database.sql chạy trên mysql workbench 
-```
+copy file database.sql chạy trên mysql workbench 
+
 
 
 ## API
