@@ -17,7 +17,10 @@ copy file database.sql chạy trên mysql workbench
 <hr>
 
 ### 1. Signup
-- **Link**: http://localhost:3000/user/signup
+- **Link**: 
+```
+    http://localhost:3000/user/signup
+```
 - **Type**: POST
 - **Request**:
   
@@ -38,7 +41,10 @@ copy file database.sql chạy trên mysql workbench
     ```
 
 ### 2. Login
-- **Link**: http://localhost:3000/user/login
+- **Link**:
+```
+    http://localhost:3000/user/login
+```
 - **Type**: POST
 - **Request**:
   
@@ -66,7 +72,10 @@ copy file database.sql chạy trên mysql workbench
     ```
 
 ### 3. Logout
-- **Link**: http://localhost:3000/user/logout
+- **Link**:
+```
+    http://localhost:3000/user/logout
+```
 - **Type**: POST
 - **Request**:
   
@@ -86,7 +95,10 @@ copy file database.sql chạy trên mysql workbench
         }
     ```
 ### 4. change_info_after_signup
-- **Link**: http://localhost:3000/user/change_info_after_signup
+- **Link**:
+```
+    http://localhost:3000/user/change_info_after_signup
+```
 - **Type**: PUT
 - **Request**:
   
@@ -108,7 +120,10 @@ copy file database.sql chạy trên mysql workbench
         }
     ```
 ### 5. get_list_rooms
-- **Link**: http://localhost:3000/room/get_lists_rooms
+- **Link**:
+```
+    http://localhost:3000/room/get_lists_rooms
+```
 - **Type**: GET
 - **Request**:
   
@@ -148,7 +163,10 @@ copy file database.sql chạy trên mysql workbench
         }
     ```
 ### 6. get_rooom
-- **Link**: http://localhost:3000/room/get_room
+- **Link**:
+```
+    http://localhost:3000/room/get_room
+```
 - **Type**: GET
 - **Request**:
   
@@ -181,7 +199,10 @@ copy file database.sql chạy trên mysql workbench
         }
     ```
 ### 7. add_room
-- **Link**: http://localhost:3000/room/add_room
+- **Link**:
+```
+    http://localhost:3000/room/add_room
+```
 - **Type**: POST
 - **Request**:
   
@@ -215,7 +236,10 @@ copy file database.sql chạy trên mysql workbench
         }
     ```
 ### 8. edit_room
-- **Link**: http://localhost:3000/room/edit_room
+- **Link**:
+```
+    http://localhost:3000/room/edit_room
+```
 - **Type**: PUT
 - **Request**:
   
