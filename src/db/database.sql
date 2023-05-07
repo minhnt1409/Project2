@@ -24,36 +24,26 @@ CREATE TABLE rooms (
   PRIMARY KEY (room_id)
 );
 
-create table post
+create table comments
 (
     id int not null primary key auto_increment,
     deleted bool null,
-    created_date bigint null,
-    created_by nvarchar(255) null,
-    modified_date bigint null,
-    modified_by nvarchar(255) null,
-    content text null,
-    user_id int null
-);
-
-create table comment
-(
-    id int not null primary key auto_increment,
-    deleted bool null,
-    created_date bigint null,
+    created datetime null,
     created_by nvarchar(255) null,
     modified_date bigint null,
     modified_by nvarchar(255) null,
     content text null,
     post_id int null,
-    user_id int null
+    user_id int null,
+    author_id INT NOT NULL,
+    room_id INT NOT NULL
 );
 
 create table blocks
 (
     id int not null primary key auto_increment,
     deleted bool null,
-    created_date bigint null,
+    created bigint null,
     created_by nvarchar(255) null,
     modified_date bigint null,
     modified_by nvarchar(255) null,
@@ -65,7 +55,7 @@ create table report
 (
     id int not null primary key auto_increment,
     deleted bool null,
-    created_date bigint null,
+    created bigint null,
     created_by nvarchar(255) null,
     modified_date bigint null,
     modified_by nvarchar(255) null,
