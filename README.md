@@ -1,5 +1,10 @@
 # Project II. NGUYỄN THÀNH MINH 20200409
 
+## Danh sách API 
+```
+    https://docs.google.com/document/d/13Sg9zlCjb65Mffknu7j2rO7eHMC-WnXBdCiClAM3uCg/edit
+```
+
 ## Run server
 ```
     $ npm install express mysql12 body-parser bcrypt jsonwebtoken uuid getmac multer moment
@@ -12,15 +17,14 @@
 copy file database.sql chạy trên mysql workbench 
 
 
-
 ## API
 <hr>
 
 ### 1. Signup
 - **Link**: 
-```
-    http://localhost:3000/user/signup
-```
+    ```
+        http://localhost:3000/user/signup
+    ```
 - **Type**: POST
 - **Request**:
   
@@ -42,9 +46,9 @@ copy file database.sql chạy trên mysql workbench
 
 ### 2. Login
 - **Link**:
-```
-    http://localhost:3000/user/login
-```
+    ```
+        http://localhost:3000/user/login
+    ```
 - **Type**: POST
 - **Request**:
   
@@ -73,9 +77,9 @@ copy file database.sql chạy trên mysql workbench
 
 ### 3. Logout
 - **Link**:
-```
-    http://localhost:3000/user/logout
-```
+    ```
+        http://localhost:3000/user/logout
+    ```
 - **Type**: POST
 - **Request**:
   
@@ -96,9 +100,9 @@ copy file database.sql chạy trên mysql workbench
     ```
 ### 4. change_info_after_signup
 - **Link**:
-```
-    http://localhost:3000/user/change_info_after_signup
-```
+    ```
+        http://localhost:3000/user/change_info_after_signup
+    ```
 - **Type**: PUT
 - **Request**:
   
@@ -121,9 +125,9 @@ copy file database.sql chạy trên mysql workbench
     ```
 ### 5. get_list_rooms
 - **Link**:
-```
-    http://localhost:3000/room/get_lists_rooms
-```
+    ```
+        http://localhost:3000/room/get_lists_rooms
+    ```
 - **Type**: GET
 - **Request**:
   
@@ -164,9 +168,9 @@ copy file database.sql chạy trên mysql workbench
     ```
 ### 6. get_rooom
 - **Link**:
-```
-    http://localhost:3000/room/get_room
-```
+    ```
+        http://localhost:3000/room/get_room
+    ```
 - **Type**: GET
 - **Request**:
   
@@ -200,9 +204,9 @@ copy file database.sql chạy trên mysql workbench
     ```
 ### 7. add_room
 - **Link**:
-```
-    http://localhost:3000/room/add_room
-```
+    ```
+        http://localhost:3000/room/add_room
+    ```
 - **Type**: POST
 - **Request**:
   
@@ -237,9 +241,9 @@ copy file database.sql chạy trên mysql workbench
     ```
 ### 8. edit_room
 - **Link**:
-```
-    http://localhost:3000/room/edit_room
-```
+    ```
+        http://localhost:3000/room/edit_room
+    ```
 - **Type**: PUT
 - **Request**:
   
