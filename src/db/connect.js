@@ -9,7 +9,7 @@ const connection = mysql.createConnection({
     database: 'api',
 });
 
-connection.connect(error => {
+connection.connect((error,res) => {
     if (error) {
         console.log('Cannot connect to database:', error);
         return callRes(res,responseError.CAN_NOT_CONNECT_TO_DB,null);

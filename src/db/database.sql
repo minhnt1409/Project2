@@ -1,3 +1,4 @@
+CREATE DATABASE api;
 USE api;
 
 CREATE TABLE users (
