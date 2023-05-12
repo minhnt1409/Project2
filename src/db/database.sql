@@ -26,17 +26,20 @@ CREATE TABLE rooms (
 
 create table comments
 (
-    id int not null primary key auto_increment,
+    comment_id int not null primary key auto_increment,
     deleted bool null,
     created datetime null,
     created_by nvarchar(255) null,
     modified_date bigint null,
     modified_by nvarchar(255) null,
     content text null,
-    post_id int null,
     user_id int null,
-    author_id INT NOT NULL,
     room_id INT NOT NULL
+    author_id INT NOT NULL,
+    author_name VARCHAR(255) NOT NULL,
+    auuthor_avatar VARCHAR(255) NOT NULL,
+    PRIMARY KEY (comment_id),
+    FOREIGN KEY (author_id,author_name,author_avatar) REFERENCES users(id,username,avatar)
 );
 
 create table blocks
