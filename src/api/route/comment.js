@@ -154,8 +154,23 @@ router.post('/set_comment', verify, async (req, res) => {
                 author_avatar = results[0].avatar;
             });
             created = new Date();
+
+            // save into DB
+            const commentData = {
+                user_id: user_id,
+                content: content,
+                author_id: author_id,
+                author_name: author_name,
+                author_avatar: author_avatar,
+                created: created
+            };
+            query = `INSERT INTO comments SET ?`;
+            connection.query(query, commentData, function (error, results) {
+                if (error) return callRes(res, responseError.UNKNOWN_ERROR, null);
+            });
             return {user_id, content, author_id, author_name, author_avatar, created};
         };
+        // push into comments[] to print out using sliceComments[]
         if(!comments) {
             comments = [savedComment];
         } else {
