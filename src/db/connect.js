@@ -1,11 +1,14 @@
 import mysql from 'mysql2';
+import dotenv from 'dotenv';
 import responseError from '../api/response/response.js';
 import { callRes } from '../api/response/response.js';
 
+dotenv.config();
+
 const connection = mysql.createConnection({
     host: 'localhost',
-    user: 'root',
-    password: 'khacdat194011',
+    user: process.env.MYSQL_USER,
+    password: process.env.MYSQL_PASSWORD,
     database: 'api',
 });
 
