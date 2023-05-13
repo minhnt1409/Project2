@@ -4,6 +4,7 @@ import { router as roomRouter } from './room.js';
 import { router as usersRouter } from './users.js';
 import { router as utilRouter } from './util.js';
 import { router as conversationRouter } from './conversation.js'
+import { router as pushRouter } from './push.js'
 
 function route(app) {
     app.use('/user', usersRouter);
@@ -12,6 +13,7 @@ function route(app) {
     app.use('/notification', notificationRouter);
     app.use('/util', utilRouter);
     app.use('/conversation', conversationRouter);
+    app.use('/push', pushRouter);
 }
 
 export { route };

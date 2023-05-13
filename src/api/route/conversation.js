@@ -102,6 +102,7 @@ router.post('/delete-conversation', verifyToken, wrapAsync(async (req, res) => {
   return res.status(200).json({ code: 1000, message: 'OK' });
 }));
 
+// Xoá mail từ một người chơi khác
 router.post('/delete-message', verifyToken, wrapAsync(async (req, res) => {
   const { conversation_id, message_id } = req.body;
   if (!conversation_id || !message_id) throw new ParameterError(ParameterErrorType.NOT_ENOUGH);
