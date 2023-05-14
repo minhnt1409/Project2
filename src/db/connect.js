@@ -5,7 +5,7 @@ import {callRes} from '../api/response/response.js';
 const connection = mysql.createConnection({
     host: 'localhost',
     user: 'root',
-    password: 'root',
+    password: 'dong2605',
     database: 'api',
 });
 

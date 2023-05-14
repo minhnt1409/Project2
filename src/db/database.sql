@@ -24,7 +24,21 @@ CREATE TABLE rooms (
   modified VARCHAR(255),
   PRIMARY KEY (room_id)
 );
-
+CREATE TABLE tasks (
+  task_id INT NOT NULL AUTO_INCREMENT,
+  task_name VARCHAR(100) NOT NULL,
+  current INT DEFAULT(1),
+  begin_at VARCHAR(255),
+  end_at VARCHAR(255),
+  PRIMARY KEY (task_id),
+  
+);
+CREATE TABLE score (
+score_id INT NOT NULL AUTO_INCREMENT primary key ,
+  score INT ,
+  user_id INT,
+  FOREIGN KEY(user_id) REFERENCES users(id) 
+);
 INSERT INTO users (username, password, role, is_block)
 VALUES ('user1', '1', 'user', 0);
 

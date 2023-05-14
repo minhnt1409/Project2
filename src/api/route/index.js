@@ -11,6 +11,7 @@ function route(app) {
     app.use('/comment', commentRouter);
     app.use('/notification', notificationRouter);
     app.use('/util', utilRouter);
+    
 }
 
 export { route };

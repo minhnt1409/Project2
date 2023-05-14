@@ -22,9 +22,9 @@ router.get('/get_list_rooms', async (req, res) => {
     const token = req.body.token;
     const index = parseInt(req.body.index || 0);
     const count = parseInt(req.body.count || 20);
-
+console.log(token)
     // kiểm tra token
-    if (!token) return callRes(res, responseError.PARAMETER_IS_NOT_ENOUGH, null);
+    //if (!token) return callRes(res, responseError.PARAMETER_IS_NOT_ENOUGH, null);
 
     // truy vấn cơ sở dữ liệu
     connection.query(`SELECT * FROM rooms LIMIT ${index}, ${count}`, (err, results) => {
