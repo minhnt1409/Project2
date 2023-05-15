@@ -56,14 +56,16 @@ create table blocks
 
 create table report
 (
-    id int not null primary key auto_increment,
+    report_id int not null primary key auto_increment,
     deleted bool null,
     created bigint null,
     created_by nvarchar(255) null,
     modified_date bigint null,
     modified_by nvarchar(255) null,
     user_id int null,
-    post_id int null
+    room_id int null,
+    content text null,
+    PRIMARY KEY (report_id),
 );
 
 CREATE TABLE IF NOT EXISTS push (
