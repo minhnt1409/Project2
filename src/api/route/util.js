@@ -75,4 +75,46 @@ router.post('/set_block', async (req, res) => {
     }
 });
 
+// API xem danh sách bị chặn (chỉ dành cho admin): get_list_block
+router.get('/get_list_block', async (req, res) => {
+    let { token } = req.body;
+
+    if(!token) return callRes(res, responseError.PARAMETER_VALUE_IS_INVALID,null);
+
+    try {
+        // verify token
+        const decoded = jsonwebtoken.verify(token, JWT_SECRET);
+        console.log(decoded);
+        
+
+        // check admin role
+        const query = `SELECT role FROM users 
+                        WHERE id = ${user_id}`;
+    
+        connection.query(query, function (error, results, fields) {
+            if (error) return callRes(res, responseError.UNKNOWN_ERROR, null);
+            if(results[0].role != 'admin') return callRes(res, responseError.NOT_ACCESS, null);
+        });
+
+        // get data from DB
+        const query2 = `SELECT id, username, avatar FROM users WHERE is_block = 1`;
+
+        connection.query(query2, function (error, results, fields) {
+            if (error) return callRes(res, responseError.UNKNOWN_ERROR, null);
+            const data = results.map(result => {
+                const { id, username, avatar } = result;
+                return { 
+                    user_id: id,
+                    username: username,
+                    avatar: avatar
+                };
+            });
+            callRes(res, responseError.OK, data);
+        });
+    } catch (error) {
+        console.log(error);
+        return callRes(res, responseError.TOKEN_IS_INVALID, null);
+    }
+});
+
 export { router };
