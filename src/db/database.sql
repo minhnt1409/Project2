@@ -66,6 +66,14 @@ create table report
     post_id int null
 );
 
+CREATE TABLE IF NOT EXISTS push (
+    id INT NOT NULL AUTO_INCREMENT,
+    new_roommate VARCHAR(255),
+    new_room VARCHAR(255),
+    news VARCHAR(255),
+    PRIMARY KEY (id)
+);
+
 INSERT INTO users (username, password, role, is_block)
 VALUES ('user1', '1', 'user', 0);
 
