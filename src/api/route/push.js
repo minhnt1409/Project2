@@ -2,7 +2,7 @@ import express from 'express';
 import verifyToken from '../middleware/authMiddleware.js';
 import wrapAsync from '../utils/wrapAsync.js';
 import responseError, { callRes } from '../response/response.js';
-import connection from '../../db/connect';
+import connection from '../../db/connect.js';
 
 const router = express.Router();
 

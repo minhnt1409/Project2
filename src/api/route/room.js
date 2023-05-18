@@ -11,6 +11,7 @@ import responseError, { callRes } from '../response/response.js';
 
 // Import database connection
 import connection from '../../db/connect.js';
+import { log } from 'console';
 
 const router = express.Router();
 
