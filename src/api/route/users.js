@@ -6,15 +6,20 @@ import { v4 as uuidv4 } from 'uuid';
 import path from 'path';
 import fs from 'fs';
 import validInput from '../utils/validInput.js';
-import responseError, { callRes } from '../response/response.js';
+import responseError from '../response/response.js';
+import { callRes } from '../response/response.js';
+import dotenv from 'dotenv';
 
 // Import database connection
 import connection from '../../db/connect.js';
+import wrapAsync from '../utils/wrapAsync.js';
+import { ParameterError, ParameterErrorType } from '../../common/errors.js';
+import verifyToken from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-const JWT_SECRET = process.env.JWT_SECRET;
-
+dotenv.config();
+const JWT_SECRET = 'maBiMat';
 // API đăng ký
 router.post('/signup', async (req, res) => {
     const { password } = req.body;
@@ -48,12 +53,12 @@ router.post('/signup', async (req, res) => {
 //API đăng nhập
 router.post('/login', async (req, res) => {
     const { username, password, uuid } = req.body;
-    
-    if(!username  || !password || !uuid) return callRes(res, responseError.PARAMETER_IS_NOT_ENOUGH, null);
-    if(typeof username != 'string' || typeof password != 'string' || typeof uuid != 'string'){
-        return callRes(res, responseError.PARAMETER_TYPE_IS_INVALID,null);
+
+    if (!username || !password || !uuid) return callRes(res, responseError.PARAMETER_IS_NOT_ENOUGH, null);
+    if (typeof username != 'string' || typeof password != 'string' || typeof uuid != 'string') {
+        return callRes(res, responseError.PARAMETER_TYPE_IS_INVALID, null);
     }
-    
+
     const sql = 'SELECT * FROM users WHERE username = ?';
     connection.query(sql, [username], (err, results) => {
         if (err) return callRes(res, responseError.UNKNOWN_ERROR, null);
@@ -84,10 +89,34 @@ router.post('/login', async (req, res) => {
                     }
                     return callRes(res, responseError.OK, data);
                 });
-            }else return callRes(res, responseError.PARAMETER_VALUE_IS_INVALID,null);
+            } else return callRes(res, responseError.PARAMETER_VALUE_IS_INVALID, null);
         });
     });
 });
+
+
+// API đổi mật khẩu
+router.post('/change-password', verifyToken, wrapAsync(async (req, res) => {
+    const { old_password, new_password } = req.body;
+    if (!old_password || !new_password) throw new ParameterError(ParameterErrorType.NOT_ENOUGH);
+    if (typeof old_password !== 'string' || typeof new_password !== 'string') throw new ParameterError(ParameterErrorType.INVALID_TYPE);
+    if (old_password === new_password) throw new ParameterError(ParameterErrorType.INVALID_VALUE);
+
+    const userId = req.userId;
+    connection.query(`SELECT * FROM users WHERE id = ${userId}`, (error, result) => {
+        if (error) return callRes(res, responseError.UNKNOWN_ERROR, null);
+        const user = result[0];
+        bcryptjs.compare(old_password, user.password).then(validPassword => {
+            console.log(validPassword, old_password, user);
+            if (!validPassword) return callRes(res, responseError.PARAMETER_VALUE_IS_INVALID, null);
+            bcryptjs.hash(new_password, 10).then(hashedPassword => {
+                connection.query(`UPDATE users SET password='${hashedPassword}' WHERE id = ${userId}`);
+                return res.status(200).json({ code: 1000, message: 'OK' });
+            }).catch(() => callRes(res, responseError.UNKNOWN_ERROR, null));
+        }).catch(() => callRes(res, responseError.UNKNOWN_ERROR, null));
+    });
+
+}))
 
 // API đăng xuất
 router.post('/logout', async (req, res) => {
