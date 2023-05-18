@@ -14,7 +14,7 @@ import connection from '../../db/connect.js';
 
 const router = express.Router();
 
-const JWT_SECRET = 'maBiMat';
+const JWT_SECRET = process.env.JWT_SECRET;
 const now = moment(); // Lấy ra đối tượng moment hiện tại
 
 // Api lấy danh sách phòng

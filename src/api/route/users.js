@@ -13,7 +13,7 @@ import connection from '../../db/connect.js';
 
 const router = express.Router();
 
-const JWT_SECRET = 'maBiMat';
+const JWT_SECRET = process.env.JWT_SECRET;
 
 // API đăng ký
 router.post('/signup', async (req, res) => {
