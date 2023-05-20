@@ -117,4 +117,109 @@ router.get('/get_list_block', async (req, res) => {
     }
 });
 
+// API search
+router.post('/search', async (req, res) => {
+    let { token, keyword, index, count } = req.body;
+
+    if(!token || (keyword !== 0 && !keyword) || (index !== 0 && !index) || (count !== 0 && !count))
+        return callRes(res, responseError.PARAMETER_IS_NOT_ENOUGH, null);
+
+    if(!validInput.checkNumber(index) || !validInput.checkNumber(count)) {
+        console.log("chi chua cac ki tu so");
+        return setAndSendResponse(res, responseError.PARAMETER_VALUE_IS_INVALID);
+    }
+
+    index = parseInt(index, 10);
+    count = parseInt(count, 10);
+    if(isNaN(index) || isNaN(count)) {
+        console.log("PARAMETER_VALUE_IS_INVALID");
+        return setAndSendResponse(res, responseError.PARAMETER_VALUE_IS_INVALID);
+    }
+
+    var founds = [];
+
+    try {
+        // verify token
+        const decoded = jsonwebtoken.verify(token, JWT_SECRET);
+        console.log(decoded);
+
+        keyword = keyword.trim().toLowerCase();
+
+        // 1. search comment data from DB
+        const query = `SELECT comment_id, content, author_name, author_id, author_avatar, created FROM comments WHERE content LIKE '%${keyword}%'`;
+
+        connection.query(query, function (error, results, fields) {
+            if (error) return callRes(res, responseError.UNKNOWN_ERROR, null);
+            const data = results.map(result => {
+                const { comment_id, content, author_name, author_id, author_avatar, created } = result;
+                return {
+                    comments: {
+                        comment_id: comment_id,
+                        content: content,
+                        author: {
+                            username: author_name,
+                            id: author_id,
+                            avatar: author_avatar
+                        },
+                        created: created
+                    }
+                };
+            });
+            founds.push(data);
+        });
+
+        // 2. search room data from DB
+        const query2 = `SELECT room_id, room_name, current, max, speed, author_id, author_name, created, modified FROM rooms WHERE room_name LIKE '%${keyword}%'`;
+
+        connection.query(query2, function (error, results, fields) {
+            if (error) return callRes(res, responseError.UNKNOWN_ERROR, null);
+            const data = results.map(result => {
+                const { room_id, room_name, current, max, speed, author_id, author_name, created, modified } = result;
+                return {
+                    rooms: {
+                        room_id: room_id,
+                        room_name: room_name,
+                        current: current,
+                        max: max,
+                        speed: speed,
+                        author: {
+                            username: author_name,
+                            id: author_id,
+                        },
+                        created: created,
+                        modified: modified
+                    }
+                };
+            });
+            founds.push(data);
+        });
+
+        // 3. search user data from DB
+        const query3 = `SELECT id, username, email, avatar FROM users WHERE username LIKE '%${keyword}%'`;
+
+        connection.query(query3, function (error, results, fields) {
+            if (error) return callRes(res, responseError.UNKNOWN_ERROR, null);
+            const data = results.map(result => {
+                const { id, username, email, avatar } = result;
+                return {
+                    users: {
+                        user_id: id,
+                        username: username,
+                        email: email,
+                        avatar: avatar
+                    }
+                };
+            });
+            founds.push(data);
+        });
+
+        // Return all result
+        return callRes(res, responseError.OK, founds);
+
+    } catch (error) {
+        console.log(error);
+        return callRes(res, responseError.TOKEN_IS_INVALID, null);
+    }
+});
+
 export { router };

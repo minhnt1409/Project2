@@ -19,6 +19,7 @@ CREATE TABLE rooms (
   max INT DEFAULT(20),
   speed INT DEFAULT(1),
   author_id INT NOT NULL,
+  author_name VARCHAR(255) NOT NULL,
   created VARCHAR(255),
   modified VARCHAR(255),
   PRIMARY KEY (room_id)
