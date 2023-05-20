@@ -7,12 +7,12 @@ dotenv.config();
 
 const connection = mysql.createConnection({
     host: 'localhost',
-    user: process.env.MYSQL_USER,
-    password: process.env.MYSQL_PASSWORD,
+    user: 'root',
+    password: 'root',
     database: 'api',
 });
 
-connection.connect((error,res) => {
+connection.connect(error => {
     if (error) {
         console.log('Cannot connect to database:', error);
         return callRes(res, responseError.CAN_NOT_CONNECT_TO_DB, null);

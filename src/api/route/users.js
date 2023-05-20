@@ -8,7 +8,6 @@ import fs from 'fs';
 import validInput from '../utils/validInput.js';
 import responseError from '../response/response.js';
 import { callRes } from '../response/response.js';
-import dotenv from 'dotenv';
 
 // Import database connection
 import connection from '../../db/connect.js';
@@ -236,4 +235,28 @@ router.get('/get_user_info', async (req, res) => {
 
 });
 
+
+// Api lấy thông tin người chơi
+router.get('/get_user_info', (req, res) => {
+    let { token, user_id } = req.body;
+    let tokenUser;
+    if (token) {
+        const tokenUserQuery = `SELECT id FROM users WHERE token = ${token}`;
+
+        connection.query(tokenUserQuery, function (error, results, fields) {
+            if (error) return callRes(res, responseError.TOKEN_IS_INVALID, null);
+            tokenUser = results[0];
+        });
+    }
+    if (!user_id && tokenUser ) {
+        user_id = tokenUser.id;
+    }
+
+    const query = `SELECT id, username, avatar, email FROM users WHERE id = ${user_id}`;
+
+    connection.query(query, function (error, results, fields) {
+        if (error) return callRes(res, responseError.UNKNOWN_ERROR, null);
+        callRes(res, responseError.OK, results[0]);
+    });
+});
 export { router };
