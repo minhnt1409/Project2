@@ -7,7 +7,7 @@ import connection from '../../db/connect.js';
 const router = express.Router();
 
 // Thiết lập thông báo
-router.post('/set-push-setting', verifyToken, wrapAsync(async (req, res) => {
+router.post('/set_push_setting', verifyToken, wrapAsync(async (req, res) => {
   const { new_roommate, new_room, news } = req.body;
   if (!new_roommate && !new_room && !news) throw new ParameterError(ParameterErrorType.NOT_ENOUGH);
   if (typeof new_roommate !== 'string' && typeof new_room !== 'string' && typeof news !== 'string') throw new ParameterError(ParameterErrorType.INVALID_TYPE);

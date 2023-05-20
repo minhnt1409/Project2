@@ -9,7 +9,7 @@ import execDeleteQuery from '../utils/execDeleteQuery.js';
 const router = express.Router();
 
 // Xem danh sách các mail từ một người chơi khác
-router.get('/get-list-conversations', verifyToken, wrapAsync(async (req, res) => {
+router.get('/get_list_conversations', verifyToken, wrapAsync(async (req, res) => {
   const { index, count } = req.body;
   if (!index || !count) throw new ParameterError(ParameterErrorType.NOT_ENOUGH);
   if (typeof index !== 'string' && typeof count !== 'string') throw new ParameterError(ParameterErrorType.INVALID_TYPE);
@@ -35,7 +35,7 @@ router.get('/get-list-conversations', verifyToken, wrapAsync(async (req, res) =>
 }));
 
 // Xem danh sách các mail mới nhất từ người chơi còn lại
-router.get('/get-conversation-detail', verifyToken, wrapAsync(async (req, res) => {
+router.get('/get_conversation_detail', verifyToken, wrapAsync(async (req, res) => {
   const { partner_id, index, count, conversation_id } = req.body;
   if (!index || !count || (!partner_id && !conversation_id)) throw new ParameterError(ParameterErrorType.NOT_ENOUGH);
   if (typeof index !== 'string' || typeof count !== 'string' || (typeof partner_id !== 'string' && typeof conversation_id !== 'string')) throw new ParameterError(ParameterErrorType.INVALID_TYPE);
@@ -67,7 +67,7 @@ router.get('/get-conversation-detail', verifyToken, wrapAsync(async (req, res) =
 }));
 
 // Xoá danh sách các mail từ một người chơi khác
-router.post('/delete-conversation', verifyToken, wrapAsync(async (req, res) => {
+router.post('/delete_conversation', verifyToken, wrapAsync(async (req, res) => {
   const { partner_id, conversation_id } = req.body;
   if (!partner_id && !conversation_id) throw new ParameterError(ParameterErrorType.NOT_ENOUGH);
   if (typeof partner_id !== 'string' && typeof conversation_id !== 'string') throw new ParameterError(ParameterErrorType.INVALID_TYPE);
@@ -103,7 +103,7 @@ router.post('/delete-conversation', verifyToken, wrapAsync(async (req, res) => {
 }));
 
 // Xoá mail từ một người chơi khác
-router.post('/delete-message', verifyToken, wrapAsync(async (req, res) => {
+router.post('/delete_message', verifyToken, wrapAsync(async (req, res) => {
   const { conversation_id, message_id } = req.body;
   if (!conversation_id || !message_id) throw new ParameterError(ParameterErrorType.NOT_ENOUGH);
   if (typeof conversation_id !== 'string' && typeof message_id !== 'string') throw new ParameterError(ParameterErrorType.INVALID_TYPE);

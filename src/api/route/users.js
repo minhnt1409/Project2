@@ -8,6 +8,7 @@ import fs from 'fs';
 import validInput from '../utils/validInput.js';
 import responseError from '../response/response.js';
 import { callRes } from '../response/response.js';
+import dotenv from 'dotenv';
 
 // Import database connection
 import connection from '../../db/connect.js';
