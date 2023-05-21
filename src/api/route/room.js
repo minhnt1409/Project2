@@ -20,7 +20,8 @@ const now = moment(); // Lấy ra đối tượng moment hiện tại
 
 // Api lấy danh sách phòng
 router.get('/get_list_rooms', async (req, res) => {
-    const token = req.body.token;
+    const authHeader = req.header("Authorization");
+    let token = authHeader && authHeader.split(" ")[1];
     const index = parseInt(req.body.index || 0);
     const count = parseInt(req.body.count || 20);
 
@@ -37,7 +38,9 @@ router.get('/get_list_rooms', async (req, res) => {
 });
 // Api lấy thông tin phòng
 router.get('/get_room', async (req, res) => {
-    const {token, room_id} = req.body;
+    const authHeader = req.header("Authorization");
+    let token = authHeader && authHeader.split(" ")[1];
+    const room_id = req.body.room_id;
     if (!token || !room_id) return callRes(res, responseError.PARAMETER_IS_NOT_ENOUGH, null);
 
     // Kiểm tra xác thực token của admin
@@ -76,7 +79,9 @@ router.get('/get_room', async (req, res) => {
 });
 // Api thêm phòng chỉ dành cho quản trị viên
 router.post('/add_room', async (req, res) => {
-    const { token, room_name, max } = req.body;
+    const authHeader = req.header("Authorization");
+    let token = authHeader && authHeader.split(" ")[1];
+    const { room_name, max } = req.body;
 
     if (!token || !room_name) return callRes(res, responseError.PARAMETER_IS_NOT_ENOUGH, null);
 
@@ -133,7 +138,9 @@ router.post('/add_room', async (req, res) => {
 
 // Api sửa phòng chỉ dành cho admin
 router.put('/edit_room', async (req, res) => {
-    const { token, room_id, room_name, max } = req.body;
+    const authHeader = req.header("Authorization");
+    let token = authHeader && authHeader.split(" ")[1];
+    const { room_id, room_name, max } = req.body;
 
     // Kiểm tra xem value có hợp lệ hay không
     if(!token || !room_id) return callRes(res, responseError.PARAMETER_VALUE_IS_INVALID,null);
