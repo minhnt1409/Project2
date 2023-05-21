@@ -155,3 +155,7 @@ VALUES
 INSERT INTO report (user_id, room_id, content)
 VALUES
 ('1', '2', 'WTF not good');
+
+INSERT INTO comments (comment_id, created, content, room_id, author_name, author_id, author_avatar)
+VALUES
+('1', '2023-04-23 10:02:00', 'Mi room 3', '3', 'Na', '2', 'abc.png');
