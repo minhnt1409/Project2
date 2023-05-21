@@ -1,5 +1,9 @@
 CREATE DATABASE api;
 
+DROP TABLE comments;
+DROP TABLE blocks;
+DROP TABLE messages;
+
 USE api;
 
 CREATE TABLE users (
@@ -40,7 +44,7 @@ CREATE TABLE IF NOT EXISTS messages (
   conversation_id INT,
   sender_id INT,
   content VARCHAR(500),
-  createdmessages DATETIME,
+  created DATETIME,
   unread BOOL,
   FOREIGN KEY (conversation_id) REFERENCES conversations(id),
   FOREIGN KEY (sender_id) REFERENCES users(id)
@@ -60,17 +64,16 @@ create table comments
     comment_id int not null primary key auto_increment,
     deleted bool null,
     created datetime null,
-    created_by nvarchar(255) null,
+    created_by varchar(255) null,
     modified_date bigint null,
-    modified_by nvarchar(255) null,
+    modified_by varchar(255) null,
     content text null,
     user_id int null,
-    room_id INT NOT NULL
+    room_id INT NOT NULL,
     author_id INT NOT NULL,
-    author_name VARCHAR(255) NOT NULL,
-    auuthor_avatar VARCHAR(255) NOT NULL,
-    PRIMARY KEY (comment_id),
-    FOREIGN KEY (author_id,author_name,author_avatar) REFERENCES users(id,username,avatar)
+    author_name VARCHAR(50) NOT NULL,
+    author_avatar VARCHAR(100),
+    FOREIGN KEY (author_id) REFERENCES users(id)
 );
 
 create table blocks
@@ -78,9 +81,9 @@ create table blocks
     id int not null primary key auto_increment,
     deleted bool null,
     created bigint null,
-    created_by nvarchar(255) null,
+    created_by varchar(255) null,
     modified_date bigint null,
-    modified_by nvarchar(255) null,
+    modified_by varchar(255) null,
     id_blocks int null,
     id_blocked int null
 );
@@ -90,13 +93,12 @@ create table report
     report_id int not null primary key auto_increment,
     deleted bool null,
     created bigint null,
-    created_by nvarchar(255) null,
+    created_by varchar(255) null,
     modified_date bigint null,
-    modified_by nvarchar(255) null,
+    modified_by varchar(255) null,
     user_id int null,
     room_id int null,
-    content text null,
-    PRIMARY KEY (report_id),
+    content text null
 );
 
 CREATE TABLE IF NOT EXISTS push (
@@ -149,3 +151,7 @@ VALUES
 ('John', 'Room 101', 'New patient moved to new room'),
 ('Jane', NULL, "Patient's health is good"),
 (NULL, 'Room 103', 'New room is available');
+
+INSERT INTO report (user_id, room_id, content)
+VALUES
+('1', '2', 'WTF not good');

@@ -240,3 +240,4 @@ router.get('/get_user_info', async (req, res) => {
     }
 
 });
+export { router };

@@ -29,7 +29,7 @@ router.post('/report', async (req, res) => {
 
         // get data from DB
         const query = `SELECT room_id, user_id, content FROM report 
-                        WHERE room_id = ${room_id} AND user_id = ${user_id} AND content = ${content}`;
+                        WHERE room_id = '${room_id}' AND user_id = '${user_id}' AND content = '${content}'`;
     
         connection.query(query, function (error, results, fields) {
             if (error) return callRes(res, responseError.UNKNOWN_ERROR, null);
@@ -60,15 +60,16 @@ router.post('/set_block', async (req, res) => {
         connection.query(query, function (error, results, fields) {
             if (error) return callRes(res, responseError.UNKNOWN_ERROR, null);
             if(results[0].role != 'admin') return callRes(res, responseError.NOT_ACCESS, null);
+
+            // update user's state in DB
+            const query2 = `UPDATE users SET is_block = 1 WHERE id = ${user_id}`;
+
+            connection.query(query2, async function (error, results, fields) {
+                if (error) return callRes(res, responseError.UNKNOWN_ERROR, null);
+                callRes(res, responseError.OK);
+            });
         });
 
-        // update user's state in DB
-        const query2 = `UPDATE users SET is_block = 1 WHERE id = ${user_id}`;
-
-        connection.query(query2, function (error, results, fields) {
-            if (error) return callRes(res, responseError.UNKNOWN_ERROR, null);
-            callRes(res, responseError.OK);
-        });
     } catch (error) {
         console.log(error);
         return callRes(res, responseError.TOKEN_IS_INVALID, null);
@@ -89,28 +90,30 @@ router.get('/get_list_block', async (req, res) => {
 
         // check admin role
         const query = `SELECT role FROM users 
-                        WHERE id = ${user_id}`;
+                        WHERE token = '${token}'`;
     
         connection.query(query, function (error, results, fields) {
             if (error) return callRes(res, responseError.UNKNOWN_ERROR, null);
             if(results[0].role != 'admin') return callRes(res, responseError.NOT_ACCESS, null);
-        });
 
-        // get data from DB
-        const query2 = `SELECT id, username, avatar FROM users WHERE is_block = 1`;
+            // get data from DB
+            const query2 = `SELECT id, username, avatar FROM users WHERE is_block = 1`;
 
-        connection.query(query2, function (error, results, fields) {
-            if (error) return callRes(res, responseError.UNKNOWN_ERROR, null);
-            const data = results.map(result => {
-                const { id, username, avatar } = result;
-                return { 
-                    user_id: id,
-                    username: username,
-                    avatar: avatar
-                };
+            connection.query(query2, function (error, results, fields) {
+                if (error) return callRes(res, responseError.UNKNOWN_ERROR, null);
+                const data = results.map(result => {
+                    const { id, username, avatar } = result;
+                    return { 
+                        user_id: id,
+                        username: username,
+                        avatar: avatar
+                    };
+                });
+                return callRes(res, responseError.OK, data);
             });
-            callRes(res, responseError.OK, data);
         });
+
+        
     } catch (error) {
         console.log(error);
         return callRes(res, responseError.TOKEN_IS_INVALID, null);
@@ -126,24 +129,24 @@ router.post('/search', async (req, res) => {
 
     if(!validInput.checkNumber(index) || !validInput.checkNumber(count)) {
         console.log("chi chua cac ki tu so");
-        return setAndSendResponse(res, responseError.PARAMETER_VALUE_IS_INVALID);
+        return callRes(res, responseError.PARAMETER_VALUE_IS_INVALID);
     }
 
     index = parseInt(index, 10);
     count = parseInt(count, 10);
     if(isNaN(index) || isNaN(count)) {
         console.log("PARAMETER_VALUE_IS_INVALID");
-        return setAndSendResponse(res, responseError.PARAMETER_VALUE_IS_INVALID);
+        return callRes(res, responseError.PARAMETER_VALUE_IS_INVALID);
     }
 
     var founds = [];
 
     try {
         // verify token
-        const decoded = jsonwebtoken.verify(token, JWT_SECRET);
-        console.log(decoded);
+        // const decoded = jsonwebtoken.verify(token, JWT_SECRET);
+        // console.log(decoded);
 
-        keyword = keyword.trim().toLowerCase();
+        // keyword = keyword.trim().toLowerCase();
 
         // 1. search comment data from DB
         const query = `SELECT comment_id, content, author_name, author_id, author_avatar, created FROM comments WHERE content LIKE '%${keyword}%'`;
@@ -165,6 +168,7 @@ router.post('/search', async (req, res) => {
                     }
                 };
             });
+            console.log(data);
             founds.push(data);
         });
 
@@ -191,6 +195,7 @@ router.post('/search', async (req, res) => {
                     }
                 };
             });
+            console.log(data);
             founds.push(data);
         });
 
