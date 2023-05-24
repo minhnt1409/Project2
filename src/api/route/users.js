@@ -182,4 +182,29 @@ router.put('/change_info_after_signup', upload.single('avatar'), async (req, res
     }
 });
 
+// Api lấy thông tin người chơi
+router.get('/get_user_info', async (req, res) => {
+    let { token, user_id } = req.body;
+    try {
+        const decoded = jsonwebtoken.verify(token, JWT_SECRET);
+        console.log(decoded);
+        const userId = decoded.userId;
+
+        if(!user_id){
+            user_id = userId;
+        }
+        
+        const query = `SELECT id, username, avatar, email FROM users WHERE id = ${user_id}`;
+    
+        connection.query(query, function (error, results, fields) {
+            if (error) return callRes(res, responseError.UNKNOWN_ERROR, null);
+            callRes(res, responseError.OK, results[0]);
+        });
+    } catch (error) {
+        console.log(error);
+        return callRes(res, responseError.TOKEN_IS_INVALID, null);
+    }
+
+});
+
 export { router };
