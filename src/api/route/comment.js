@@ -22,6 +22,10 @@ function countWord(str) {
     return str.split(" ").length;
 }
 
+function dateFormat(date) {
+    return `${new Date(date).getFullYear()}-${new Date(date).getMonth()}-${new Date(date).getDate()} ${new Date(date).getHours()}:${new Date(date).getMinutes()}:${new Date(date).getSeconds()}`
+}
+
 // API lấy các comment
 router.post('/get_comments', async (req, res) => {
     var {token, user_id, index, count, room_id} = req.body;
@@ -156,6 +160,7 @@ router.post('/set_comment', async (req, res) => {
                 author_name = results[0].username;
                 author_avatar = results[0].avatar;
                 created = new Date();
+                console.log(created.toString());
     
                 // save into DB
                 var commentData = {
@@ -168,11 +173,12 @@ router.post('/set_comment', async (req, res) => {
                 };
                 console.log("commentData");
                 console.log(commentData);
-                query = `INSERT INTO comments(comment_id, content, author_id, author_name, author_avatar, created) 
-                            VALUES (?, ?, ?, ?, ?, ?)`;
-                connection.query(query, [ comment_id, content, author_id, author_name, author_avatar, created ], function (error, results) {
+                query = `INSERT INTO comments(comment_id, content, room_id, author_id, author_name, author_avatar, created) VALUES ('${comment_id}', '${content}', '${room_id}', '${author_id}', '${author_name}', '${author_avatar}', '${dateFormat(created)}')`;
+                connection.query(query, function (error, results) {
+                    console.log(error);
                     if (error) return callRes(res, responseError.UNKNOWN_ERROR, null);
-                });
+                    console.log(results);
+                // });
 
                 // push into comments[] to print out using sliceComments[]
                 if(!comments) {
@@ -182,34 +188,38 @@ router.post('/set_comment', async (req, res) => {
                 }
                 console.log("comments");
                 console.log(comments);
+            
+
+                let sliceComments = comments.slice(index, index + count);
+
+                if(sliceComments.length < 1) {
+                    console.log('sliceComments no have comments');
+                    return callRes(res, responseError.NO_DATA_OR_END_OF_LIST_DATA);
+                }
+
+                console.log("sliceComments");
+                console.log(sliceComments);
+
+                res.status(200).send({
+                    code: "1000",
+                    message: "OK",
+                    data: sliceComments.map(comment => {
+                        return {
+                            comment_id: comment.comment_id,
+                            content: comment.content ? comment.content : null,
+                            author: {
+                                id: comment.author_id,
+                                name: comment.author_name ? comment.author_name : null,
+                                avatar: comment.author_avatar ? comment.author_avatar : null
+                            },
+                            created: comment.created,
+                        };
+                    })
+                });
+            });
+                
             });
 
-            let sliceComments = comments.slice(index, index + count);
-
-            if(sliceComments.length < 1) {
-                console.log('sliceComments no have comments');
-                return callRes(res, responseError.NO_DATA_OR_END_OF_LIST_DATA);
-            }
-
-            console.log("sliceComments");
-            console.log(sliceComments);
-
-            res.status(200).send({
-                code: "1000",
-                message: "OK",
-                data: sliceComments.map(comment => {
-                    return {
-                        comment_id: comment.comment_id,
-                        content: comment.content ? comment.content : null,
-                        author: {
-                            id: comment.author_id,
-                            name: comment.author_name ? comment.author_name : null,
-                            avatar: comment.author_avatar ? comment.author_avatar : null
-                        },
-                        created: comment.created,
-                    };
-                })
-            });
         });
     } catch (err) {
         console.log(err);
