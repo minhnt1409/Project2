@@ -151,5 +151,17 @@ function callRes(res, responseErrorName, data = null) {
   }
 }
 
+function callResNoConvert(res, responseErrorName, data = null) {
+    console.log(responseErrorName);
+  if (responseErrorName != responseError.OK){
+    if (data) responseErrorName.body.data = data;
+    return res.status(responseErrorName.statusCode).send(responseErrorName.body);
+  }
+  else {
+    responseErrorName.body.data = data;
+    return res.status(responseErrorName.statusCode).send(responseErrorName.body);
+  }
+}
+
 export default responseError;
-export {setAndSendResponse, callRes};
+export {setAndSendResponse, callRes, callResNoConvert};

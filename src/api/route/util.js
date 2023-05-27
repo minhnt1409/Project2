@@ -6,7 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 import path from 'path';
 import fs from 'fs';
 import validInput from '../utils/validInput.js';
-import responseError, { callRes } from '../response/response.js';
+import responseError, { callRes, callResNoConvert } from '../response/response.js';
 
 // Import database connection
 import connection from '../../db/connect.js';
@@ -168,17 +168,21 @@ router.post('/search', async (req, res) => {
                     }
                 };
             });
-            console.log(data);
+            // console.log('data');
+            // console.log(data);
             founds.push(data);
+            // console.log('founds');
+            // console.log(founds);
+            // console.log(JSON.stringify(founds));
         });
 
         // 2. search room data from DB
-        const query2 = `SELECT room_id, room_name, current, max, speed, author_id, author_name, created, modified FROM rooms WHERE room_name LIKE '%${keyword}%'`;
+        const query2 = `SELECT room_id, room_name, current, max, speed, author_id, created, modified FROM rooms WHERE room_name LIKE '%${keyword}%'`;
 
         connection.query(query2, function (error, results, fields) {
             if (error) return callRes(res, responseError.UNKNOWN_ERROR, null);
             const data = results.map(result => {
-                const { room_id, room_name, current, max, speed, author_id, author_name, created, modified } = result;
+                const { room_id, room_name, current, max, speed, author_id, author_name = 'Naaa', created, modified } = result;
                 return {
                     rooms: {
                         room_id: room_id,
@@ -195,8 +199,9 @@ router.post('/search', async (req, res) => {
                     }
                 };
             });
-            console.log(data);
+            // console.log(data);
             founds.push(data);
+            // console.log(founds);
         });
 
         // 3. search user data from DB
@@ -215,11 +220,13 @@ router.post('/search', async (req, res) => {
                     }
                 };
             });
+            console.log(data);
             founds.push(data);
-        });
+            console.log(founds);
 
-        // Return all result
-        return callRes(res, responseError.OK, founds);
+            // Return all result
+            return callResNoConvert(res, responseError.OK, founds);
+        });
 
     } catch (error) {
         console.log(error);
