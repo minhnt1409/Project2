@@ -96,7 +96,7 @@ router.post('/login', async (req, res) => {
 
 
 // API đổi mật khẩu
-router.post('/change-password', verifyToken, wrapAsync(async (req, res) => {
+router.post('/change_password', verifyToken, wrapAsync(async (req, res) => {
     const { old_password, new_password } = req.body;
     if (!old_password || !new_password) throw new ParameterError(ParameterErrorType.NOT_ENOUGH);
     if (typeof old_password !== 'string' || typeof new_password !== 'string') throw new ParameterError(ParameterErrorType.INVALID_TYPE);
@@ -240,3 +240,5 @@ router.get('/get_user_info', async (req, res) => {
     }
 
 });
+
+export { router };

@@ -17,7 +17,9 @@ const JWT_SECRET = 'maBiMat';
 
 // API báo cáo: report
 router.post('/report', async (req, res) => {
-    let { token, room_id, user_id, content } = req.body;
+    const authHeader = req.header("Authorization");
+    let token = authHeader && authHeader.split(" ")[1];
+    let { room_id, user_id, content } = req.body;
 
     if(!token || !room_id || !user_id || !content) return callRes(res, responseError.PARAMETER_VALUE_IS_INVALID,null);
 
@@ -43,7 +45,9 @@ router.post('/report', async (req, res) => {
 
 // API chặn người chơi(chỉ dành cho admin): set_block
 router.post('/set_block', async (req, res) => {
-    let { token, user_id } = req.body;
+    const authHeader = req.header("Authorization");
+    let token = authHeader && authHeader.split(" ")[1];
+    let { user_id } = req.body;
 
     if(!token || !user_id) return callRes(res, responseError.PARAMETER_VALUE_IS_INVALID,null);
 
@@ -77,7 +81,8 @@ router.post('/set_block', async (req, res) => {
 
 // API xem danh sách bị chặn (chỉ dành cho admin): get_list_block
 router.get('/get_list_block', async (req, res) => {
-    let { token } = req.body;
+    const authHeader = req.header("Authorization");
+    let token = authHeader && authHeader.split(" ")[1];
 
     if(!token) return callRes(res, responseError.PARAMETER_VALUE_IS_INVALID,null);
 
@@ -119,7 +124,9 @@ router.get('/get_list_block', async (req, res) => {
 
 // API search
 router.post('/search', async (req, res) => {
-    let { token, keyword, index, count } = req.body;
+    const authHeader = req.header("Authorization");
+    let token = authHeader && authHeader.split(" ")[1];
+    let { keyword, index, count } = req.body;
 
     if(!token || (keyword !== 0 && !keyword) || (index !== 0 && !index) || (count !== 0 && !count))
         return callRes(res, responseError.PARAMETER_IS_NOT_ENOUGH, null);
