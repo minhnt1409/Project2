@@ -139,7 +139,9 @@ router.post('/search', async (req, res) => {
         return callRes(res, responseError.PARAMETER_VALUE_IS_INVALID);
     }
 
-    var founds = [];
+    var founds1 = [];
+    var founds2 = [];
+    var founds3 = [];
 
     try {
         // verify token
@@ -156,7 +158,7 @@ router.post('/search', async (req, res) => {
             const data = results.map(result => {
                 const { comment_id, content, author_name, author_id, author_avatar, created } = result;
                 return {
-                    comments: {
+                    // comments: {
                         comment_id: comment_id,
                         content: content,
                         author: {
@@ -165,14 +167,14 @@ router.post('/search', async (req, res) => {
                             avatar: author_avatar
                         },
                         created: created
-                    }
+                    // }
                 };
             });
             // console.log('data');
             // console.log(data);
-            founds.push(data);
+            founds1.push(data);
             // console.log('founds');
-            // console.log(founds);
+            // console.log(founds1.length);
             // console.log(JSON.stringify(founds));
         });
 
@@ -184,7 +186,7 @@ router.post('/search', async (req, res) => {
             const data = results.map(result => {
                 const { room_id, room_name, current, max, speed, author_id, author_name = 'Naaa', created, modified } = result;
                 return {
-                    rooms: {
+                    // rooms: {
                         room_id: room_id,
                         room_name: room_name,
                         current: current,
@@ -196,11 +198,11 @@ router.post('/search', async (req, res) => {
                         },
                         created: created,
                         modified: modified
-                    }
+                    // }
                 };
             });
             // console.log(data);
-            founds.push(data);
+            founds2.push(data);
             // console.log(founds);
         });
 
@@ -212,20 +214,33 @@ router.post('/search', async (req, res) => {
             const data = results.map(result => {
                 const { id, username, email, avatar } = result;
                 return {
-                    users: {
+                    // users: {
                         user_id: id,
                         username: username,
                         email: email,
                         avatar: avatar
-                    }
+                    // }
                 };
             });
-            console.log(data);
-            founds.push(data);
-            console.log(founds);
+            // console.log(data);
+            founds3.push(data);
+            // console.log(founds3);
 
             // Return all result
-            return callResNoConvert(res, responseError.OK, founds);
+            var founds = {
+                comments: founds1[0],
+                rooms: founds2[0],
+                users: founds3[0]
+            };
+
+            // return callResNoConvert(res, responseError.OK, founds);
+            res.status(200).send({
+                code: "1000",
+                message: "OK",
+                data: {
+                    result: founds
+                }
+            });
         });
 
     } catch (error) {
