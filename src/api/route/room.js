@@ -18,16 +18,49 @@ const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET;
 const now = moment(); // Lấy ra đối tượng moment hiện tại
 
+/**
+ * @swagger
+ * tags:
+ *   name: Rooms
+ *   description: API endpoints for managing Rooms
+ */
+
 // Api lấy danh sách phòng
+/**
+ * @swagger
+ * /room/get_list_rooms:
+ *   get:
+ *     summary: Lấy danh sách các phòng
+ *     description: Lấy danh sách các phòng từ cơ sở dữ liệu
+ *     tags:
+ *       - Rooms
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: index
+ *         schema:
+ *           type: integer
+ *         description: Vị trí bắt đầu của danh sách phòng (mặc định là 0)
+ *       - in: query
+ *         name: count
+ *         schema:
+ *           type: integer
+ *         description: Số lượng phòng cần lấy (mặc định là 20)
+ *     responses:
+ *       200:
+ *         description: Lấy danh sách phòng thành công 
+ */
 router.get('/get_list_rooms', async (req, res) => {
     const authHeader = req.header("Authorization");
     let token = authHeader && authHeader.split(" ")[1];
-    const index = parseInt(req.body.index || 0);
-    const count = parseInt(req.body.count || 20);
+    const index = parseInt(req.body.index || req.query.index || 0);
+    const count = parseInt(req.body.count || req.query.count || 20);
 
     // kiểm tra token
     if (!token) return callRes(res, responseError.PARAMETER_IS_NOT_ENOUGH, null);
-
+    console.log(index, token, count);
+    
     // truy vấn cơ sở dữ liệu
     connection.query(`SELECT * FROM rooms LIMIT ${index}, ${count}`, (err, results) => {
         if (err) return callRes(res, responseError.UNKNOWN_ERROR, null);
@@ -36,11 +69,34 @@ router.get('/get_list_rooms', async (req, res) => {
         return callRes(res, responseError.OK, data);
     });
 });
+
 // Api lấy thông tin phòng
+/**
+ * @swagger
+ * /room/get_room:
+ *   get:
+ *     summary: Lấy thông tin của một phòng
+ *     description: Lấy thông tin của một phòng từ cơ sở dữ liệu
+ *     tags:
+ *       - Rooms
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: room_id
+ *         schema:
+ *           type: integer
+ *         description: ID của phòng
+ *     responses:
+ *       200:
+ *         description: Lấy thông tin của phòng thành công
+ */
+  
 router.get('/get_room', async (req, res) => {
     const authHeader = req.header("Authorization");
     let token = authHeader && authHeader.split(" ")[1];
-    const room_id = req.body.room_id;
+    const room_id = req.body.room_id  || req.query.room_id;
+    console.log(token, room_id);
     if (!token || !room_id) return callRes(res, responseError.PARAMETER_IS_NOT_ENOUGH, null);
 
     // Kiểm tra xác thực token của admin
@@ -77,11 +133,38 @@ router.get('/get_room', async (req, res) => {
         return callRes(res, responseError.TOKEN_IS_INVALID, null);
     }
 });
+
 // Api thêm phòng chỉ dành cho quản trị viên
+/**
+ * @swagger
+ * /room/add_room:
+ *   post:
+ *     summary: Thêm phòng mới
+ *     description: Thêm một phòng mới vào cơ sở dữ liệu
+ *     tags:
+ *       - Rooms
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               room_name:
+ *                 type: string
+ *               max:
+ *                 type: integer
+ *     responses:
+ *       200:
+ *         description: Thông tin của phòng mới được tạo
+ */
+
 router.post('/add_room', async (req, res) => {
     const authHeader = req.header("Authorization");
     let token = authHeader && authHeader.split(" ")[1];
     const { room_name, max } = req.body;
+    console.log(room_name, max, token);
 
     if (!token || !room_name) return callRes(res, responseError.PARAMETER_IS_NOT_ENOUGH, null);
 
@@ -96,9 +179,9 @@ router.post('/add_room', async (req, res) => {
             if (results.length === 0) return callRes(res, responseError.USER_IS_NOT_VALIDATED, null);
             if (results[0].role === 'admin') {
                 // Thêm phòng mới vào database
-                const createRoomQueryString = `INSERT INTO rooms (room_name, max, author_id, created) VALUE (?, ?, ?, ?)`;
+                const createRoomQueryString = `INSERT INTO rooms (room_name, max, author_id, author_name, created) VALUE (?, ?, ?, ?, ?)`;
                 
-                connection.query(createRoomQueryString, [room_name, max, decoded.userId, now.format('YYYY-MM-DD HH:mm:ss')], (err, Room, fields) => {
+                connection.query(createRoomQueryString, [room_name, max, decoded.userId, decoded.username, now.format('YYYY-MM-DD HH:mm:ss')], (err, Room, fields) => {
                     console.log(err);
                     if (err) return callRes(res, responseError.UNKNOWN_ERROR, null);
     
@@ -137,6 +220,32 @@ router.post('/add_room', async (req, res) => {
 });
 
 // Api sửa phòng chỉ dành cho admin
+/**
+ * @swagger
+ * /room/edit_room:
+ *   put:
+ *     summary: Chỉnh sửa thông tin phòng
+ *     description: Chỉnh sửa thông tin của một phòng trong cơ sở dữ liệu
+ *     tags:
+ *       - Rooms
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               room_id:
+ *                 type: integer
+ *               room_name:
+ *                 type: string
+ *               max:
+ *                 type: integer
+ *     responses:
+ *       200:
+ *         description: Thông tin của phòng đã được chỉnh sửa
+ */
 router.put('/edit_room', async (req, res) => {
     const authHeader = req.header("Authorization");
     let token = authHeader && authHeader.split(" ")[1];

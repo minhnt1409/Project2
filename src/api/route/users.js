@@ -20,7 +20,39 @@ const router = express.Router();
 
 dotenv.config();
 const JWT_SECRET = process.env.JWT_SECRET;
+
+/**
+ * @swagger
+ * tags:
+ *   name: Users
+ *   description: API endpoints for managing users
+ */
+
 // API đăng ký
+/**
+ * @swagger
+ * /user/signup:
+ *   post:
+ *     summary: Đăng ký
+ *     description: Đăng ký tài khoản mới
+ *     tags:
+ *       - Users
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *             required: true
+ *     responses:
+ *       200:
+ *         description: Đăng ký thành công
+ */
 router.post('/signup', async (req, res) => {
     const { password } = req.body;
     let username = req.body.username;
@@ -51,9 +83,36 @@ router.post('/signup', async (req, res) => {
 });
 
 //API đăng nhập
+/**
+ * @swagger
+ * /user/login:
+ *   post:
+ *     summary: Đăng nhập
+ *     description: Đăng nhập tài khoản với uuid là địa chỉ MAC của máy tính đăng nhập
+ *     tags:
+ *       - Users
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *               uuid:
+ *                 type: string
+ *             required: true
+ *     responses:
+ *       200:
+ *         description: Đăng nhập thành công
+ */
 router.post('/login', async (req, res) => {
     const { username, password, uuid } = req.body;
-
+    console.log(req.body);
+    console.log(username, password, uuid);
+    
     if (!username || !password || !uuid) return callRes(res, responseError.PARAMETER_IS_NOT_ENOUGH, null);
     if (typeof username != 'string' || typeof password != 'string' || typeof uuid != 'string') {
         return callRes(res, responseError.PARAMETER_TYPE_IS_INVALID, null);
@@ -119,6 +178,20 @@ router.post('/change_password', verifyToken, wrapAsync(async (req, res) => {
 }))
 
 // API đăng xuất
+/**
+ * @swagger
+ * /user/logout:
+ *   post:
+ *     summary: Đăng xuất
+ *     description: Đăng xuất khỏi tài khoản
+ *     tags:
+ *       - Users
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Đăng xuất thành công
+ */
 router.post('/logout', async (req, res) => {
     const authHeader = req.header("Authorization");
     let token = authHeader && authHeader.split(" ")[1];
@@ -144,6 +217,36 @@ router.post('/logout', async (req, res) => {
     }
 });
 
+// API cập nhật thông tin người dùng đã đăng nhập
+/**
+ * @swagger
+ * /user/change_info_after_signup:
+ *   put:
+ *     summary: Thay đổi thông tin sau khi đăng ký
+ *     description: Thay đổi thông tin người dùng sau khi đăng ký (username, email, avatar)
+ *     tags:
+ *       - Users
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               avatar:
+ *                 type: string
+ *                 format: binary
+ *               username:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *             required: true
+ *     responses:
+ *       200:
+ *         description: Thông tin đã được cập nhật thành công
+ */
+  
 // Set up multer for file upload
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -159,7 +262,6 @@ const upload = multer({
     storage: storage,
 });
 
-// API cập nhật thông tin người dùng đã đăng nhập
 router.put('/change_info_after_signup', upload.single('avatar'), async (req, res) => {
     try {
         const authHeader = req.header("Authorization");
@@ -215,10 +317,32 @@ router.put('/change_info_after_signup', upload.single('avatar'), async (req, res
 });
 
 // Api lấy thông tin người chơi
+/**
+ * @swagger
+ * /user/get_user_info:
+ *   get:
+ *     summary: Lấy thông tin người dùng
+ *     description: Lấy thông tin người dùng dựa trên ID
+ *     tags:
+ *       - Users
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: user_id
+ *         schema:
+ *           type: string
+ *         description: ID người dùng (mặc định là ID của người dùng đang xác thực)
+ *     responses:
+ *       200:
+ *         description: Thông tin người dùng
+ */
+  
 router.get('/get_user_info', async (req, res) => {
     const authHeader = req.header("Authorization");
     let token = authHeader && authHeader.split(" ")[1];
-    let user_id = req.body.user_id;
+    let user_id = req.body.user_id || req.query.user_id;
+    console.log("user_id: ", user_id);
     try {
         const decoded = jsonwebtoken.verify(token, JWT_SECRET);
         console.log(decoded);
@@ -238,7 +362,6 @@ router.get('/get_user_info', async (req, res) => {
         console.log(error);
         return callRes(res, responseError.TOKEN_IS_INVALID, null);
     }
-
 });
 
 export { router };

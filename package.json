@@ -29,6 +29,8 @@
     "mysql2": "^3.3.0",
     "path": "^0.12.7",
     "pug": "^3.0.2",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^4.6.3",
     "uuid": "^9.0.0"
   },
   "devDependencies": {
