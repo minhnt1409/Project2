@@ -128,7 +128,7 @@ router.post('/search', async (req, res) => {
     let token = authHeader && authHeader.split(" ")[1];
     let { keyword, index, count } = req.body;
 
-    if(!token || (keyword !== 0 && !keyword) || (index !== 0 && !index) || (count !== 0 && !count))
+    if((keyword !== 0 && !keyword) || (index !== 0 && !index) || (count !== 0 && !count))
         return callRes(res, responseError.PARAMETER_IS_NOT_ENOUGH, null);
 
     if(!validInput.checkNumber(index) || !validInput.checkNumber(count)) {
@@ -143,14 +143,16 @@ router.post('/search', async (req, res) => {
         return setAndSendResponse(res, responseError.PARAMETER_VALUE_IS_INVALID);
     }
 
-    var founds = [];
+    var founds1 = [];
+    var founds2 = [];
+    var founds3 = [];
 
     try {
         // verify token
         const decoded = jsonwebtoken.verify(token, JWT_SECRET);
         console.log(decoded);
 
-        keyword = keyword.trim().toLowerCase();
+        // keyword = keyword.trim().toLowerCase();
 
         // 1. search comment data from DB
         const query = `SELECT comment_id, content, author_name, author_id, author_avatar, created FROM comments WHERE content LIKE '%${keyword}%'`;
@@ -160,7 +162,7 @@ router.post('/search', async (req, res) => {
             const data = results.map(result => {
                 const { comment_id, content, author_name, author_id, author_avatar, created } = result;
                 return {
-                    comments: {
+                    // comments: {
                         comment_id: comment_id,
                         content: content,
                         author: {
@@ -169,21 +171,26 @@ router.post('/search', async (req, res) => {
                             avatar: author_avatar
                         },
                         created: created
-                    }
+                    // }
                 };
             });
-            founds.push(data);
+            // console.log('data');
+            // console.log(data);
+            founds1.push(data);
+            // console.log('founds');
+            // console.log(founds1.length);
+            // console.log(JSON.stringify(founds));
         });
 
         // 2. search room data from DB
-        const query2 = `SELECT room_id, room_name, current, max, speed, author_id, author_name, created, modified FROM rooms WHERE room_name LIKE '%${keyword}%'`;
+        const query2 = `SELECT room_id, room_name, current, max, speed, author_id, created, modified FROM rooms WHERE room_name LIKE '%${keyword}%'`;
 
         connection.query(query2, function (error, results, fields) {
             if (error) return callRes(res, responseError.UNKNOWN_ERROR, null);
             const data = results.map(result => {
-                const { room_id, room_name, current, max, speed, author_id, author_name, created, modified } = result;
+                const { room_id, room_name, current, max, speed, author_id, author_name = 'Naaa', created, modified } = result;
                 return {
-                    rooms: {
+                    // rooms: {
                         room_id: room_id,
                         room_name: room_name,
                         current: current,
@@ -195,10 +202,12 @@ router.post('/search', async (req, res) => {
                         },
                         created: created,
                         modified: modified
-                    }
+                    // }
                 };
             });
-            founds.push(data);
+            // console.log(data);
+            founds2.push(data);
+            // console.log(founds);
         });
 
         // 3. search user data from DB
@@ -209,19 +218,34 @@ router.post('/search', async (req, res) => {
             const data = results.map(result => {
                 const { id, username, email, avatar } = result;
                 return {
-                    users: {
+                    // users: {
                         user_id: id,
                         username: username,
                         email: email,
                         avatar: avatar
-                    }
+                    // }
                 };
             });
-            founds.push(data);
-        });
+            // console.log(data);
+            founds3.push(data);
+            // console.log(founds3);
 
-        // Return all result
-        return callRes(res, responseError.OK, founds);
+            // Return all result
+            var founds = {
+                comments: founds1[0],
+                rooms: founds2[0],
+                users: founds3[0]
+            };
+
+            // return callResNoConvert(res, responseError.OK, founds);
+            res.status(200).send({
+                code: "1000",
+                message: "OK",
+                data: {
+                    result: founds
+                }
+            });
+        });
 
     } catch (error) {
         console.log(error);

@@ -22,6 +22,10 @@ function countWord(str) {
     return str.split(" ").length;
 }
 
+function dateFormat(date) {
+    return `${new Date(date).getFullYear()}-${new Date(date).getMonth()}-${new Date(date).getDate()} ${new Date(date).getHours()}:${new Date(date).getMinutes()}:${new Date(date).getSeconds()}`
+}
+
 // API lấy các comment
 router.post('/get_comments', async (req, res) => {
     const authHeader = req.header("Authorization");
@@ -55,7 +59,7 @@ router.post('/get_comments', async (req, res) => {
     }
 
     try {
-        const comments = [];
+        var comments = [];
         const query = `SELECT comment_id, content, author_id, author_name, author_avatar, created FROM comments WHERE room_id = ${room_id}`;
 
         connection.query(query, function (error, results, fields) {
@@ -127,17 +131,14 @@ router.post('/set_comment', verifyToken, async (req, res) => {
     }
 
     try {
-        const comments = [];
-        const query = `SELECT comment_id, content, author_id, author_name, author_avatar, created FROM comments WHERE room_id = ${room_id}`;
+        var comments = [];
+        var query = `SELECT comment_id, content, author_id, author_name, author_avatar, created FROM comments WHERE room_id = ${room_id}`;
 
         connection.query(query, function (error, results, fields) {
             if (error) return callRes(res, responseError.UNKNOWN_ERROR, null);
             comments = results;
-        });
+            // console.log(comments);
 
-        // Save comment
-        const savedComment = function(req, res, next) {
-            const {user_id, content, author_id, author_name, author_avatar, created} = req.body;
             try {
                 const decoded = jsonwebtoken.verify(token, JWT_SECRET);
                 console.log(decoded);
@@ -145,63 +146,82 @@ router.post('/set_comment', verifyToken, async (req, res) => {
                 if(!userId) {
                     user_id = userId;
                 }
-                author_id = user_id;
-                query = `SELECT username, avatar, FROM users WHERE id = ${user_id}`;
-                connection.query(query, function (error, results, fields) {
-                    if (error) return callRes(res, responseError.UNKNOWN_ERROR, null);
-                    author_name = results[0].username;
-                    author_avatar = results[0].avatar;
-                });
+            } catch (error) {
+                console.log(error);
+                return callRes(res, responseError.TOKEN_IS_INVALID, null);
+            }
+
+            // Save comment
+            let {comment_id, content, author_id, author_name, author_avatar, created} = req.body;
+            author_id = parseInt(user_id);
+            comment_id = comments.length + 1;
+            query = `SELECT username, avatar FROM users WHERE id = ${user_id}`;
+            connection.query(query, function (error, results, fields) {
+                if (error) return callRes(res, responseError.UNKNOWN_ERROR, null);
+                
+                author_name = results[0].username;
+                author_avatar = results[0].avatar;
                 created = new Date();
+                console.log(created.toString());
     
                 // save into DB
-                const commentData = {
-                    user_id: user_id,
+                var commentData = {
+                    comment_id: comment_id,
                     content: content,
                     author_id: author_id,
                     author_name: author_name,
                     author_avatar: author_avatar,
                     created: created
                 };
-                query = `INSERT INTO comments SET ?`;
-                connection.query(query, commentData, function (error, results) {
+                console.log("commentData");
+                console.log(commentData);
+                query = `INSERT INTO comments(comment_id, content, room_id, author_id, author_name, author_avatar, created) VALUES ('${comment_id}', '${content}', '${room_id}', '${author_id}', '${author_name}', '${author_avatar}', '${dateFormat(created)}')`;
+                connection.query(query, function (error, results) {
+                    console.log(error);
                     if (error) return callRes(res, responseError.UNKNOWN_ERROR, null);
+                    console.log(results);
+                // });
+
+                // push into comments[] to print out using sliceComments[]
+                if(!comments) {
+                    comments = [commentData];
+                } else {
+                    comments.push(commentData);
+                }
+                console.log("comments");
+                console.log(comments);
+            
+
+                let sliceComments = comments.slice(index, index + count);
+
+                if(sliceComments.length < 1) {
+                    console.log('sliceComments no have comments');
+                    return callRes(res, responseError.NO_DATA_OR_END_OF_LIST_DATA);
+                }
+
+                console.log("sliceComments");
+                console.log(sliceComments);
+
+                res.status(200).send({
+                    code: "1000",
+                    message: "OK",
+                    data: sliceComments.map(comment => {
+                        return {
+                            comment_id: comment.comment_id,
+                            content: comment.content ? comment.content : null,
+                            author: {
+                                id: comment.author_id,
+                                name: comment.author_name ? comment.author_name : null,
+                                avatar: comment.author_avatar ? comment.author_avatar : null
+                            },
+                            created: comment.created,
+                        };
+                    })
                 });
-                return {user_id, content, author_id, author_name, author_avatar, created};
-            } catch (err) {
-                console.log(err);
-                return callRes(res, responseError.TOKEN_IS_INVALID, null);
-            }
-        };
-        // push into comments[] to print out using sliceComments[]
-        if(!comments) {
-            comments = [savedComment];
-        } else {
-            comments.push(savedComment);
-        }
+            });
+                
+            });
 
-        let sliceComments = comments.slice(index, index + count);
-
-        if(sliceComments.length < 1) {
-            console.log('sliceComments no have comments');  
-            return callRes(res, responseError.NO_DATA_OR_END_OF_LIST_DATA);
-        }
-
-        res.status(200).send({
-            code: "1000",
-            message: "OK",
-            data: sliceComments.map(comment => {
-                return {
-                    comment_id: comment.comment_id,
-                    content: comment.content ? comment.content : null,
-                    author: {
-                        id: comment.author_id,
-                        name: comment.author_name ? comment.author_name : null,
-                        avatar: comment.author_avatar ? comment.author_avatar : null
-                    },
-                    created: comment.created.toString(),
-                };
-            })
         });
     } catch (err) {
         console.log(err);
