@@ -15,6 +15,7 @@ const JWT_SECRET = process.env.JWT_SECRET;
 // Import database connection
 import connection from '../../db/connect.js';
 import verifyToken from '../middleware/authMiddleware.js'
+import wrapAsync from '../utils/wrapAsync.js';
 
 const router = express.Router();
 
@@ -27,9 +28,41 @@ function dateFormat(date) {
 }
 
 // API lấy các comment
-router.post('/get_comments', async (req, res) => {
-    const authHeader = req.header("Authorization");
-    let token = authHeader && authHeader.split(" ")[1];
+/**
+ * @swagger
+ * /comment/get_comments:
+ *   post:
+ *     summary: Xem bình luận
+ *     description: Xem bình luận của người chơi gửi cho quản trị của phòng và các người chơi khác xem được bình luận này
+ *     tags:
+ *       - Comments
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               token:
+ *                 type: string
+ *                 example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InVzZXI0IiwidXNlcklkIjo3LCJ1dWlkIjoiMDItNTAtMkEtRTItOTUtNkEiLCJpYXQiOjE2ODU4ODA3MTF9.lzgoKlAAsQ0DBrznfYk8xdZQ4IljoDGjRwYx1nqpvhA
+ *               user_id:
+ *                 type: string
+ *                 example: 2
+ *               index:
+ *                 type: string
+ *                 example: 0
+ *               count:
+ *                 type: string
+ *                 example: 4
+ *               room_id:
+ *                 type: string
+ *                 example: 3
+ *             required: true
+ *     responses:
+ *       200:
+ *         description: Xem bình luận thành công
+ */
+router.post('/get_comments', verifyToken, wrapAsync(async (req, res) => {
     var { user_id, index, count, room_id} = req.body;
 
     if(!user_id || (index !== 0 && !index) || (count !== 0 && !count) || (room_id !== 0 && !room_id)) {
@@ -50,13 +83,6 @@ router.post('/get_comments', async (req, res) => {
         return callRes(res, responseError.PARAMETER_VALUE_IS_INVALID);
     }
 
-    try {
-        const decoded = jsonwebtoken.verify(token, JWT_SECRET);
-        console.log(decoded);
-    } catch (err) {
-        console.log(err);
-        return callRes(res, responseError.TOKEN_IS_INVALID, null);
-    }
 
     try {
         var comments = [];
@@ -100,7 +126,7 @@ router.post('/get_comments', async (req, res) => {
         console.log(err);
         return callRes(res, responseError.CAN_NOT_CONNECT_TO_DB);
     }
-});
+}));
 
 // API gửi bình luận
 router.post('/set_comment', verifyToken, async (req, res) => {
