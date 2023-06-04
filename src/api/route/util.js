@@ -121,6 +121,10 @@ router.get('/get_list_block', async (req, res) => {
         // verify token
         const decoded = jsonwebtoken.verify(token, JWT_SECRET);
         console.log(decoded);
+        const userId = decoded.userId;
+        if(!userId) {
+            user_id = userId;
+        }
         
 
         // check admin role
