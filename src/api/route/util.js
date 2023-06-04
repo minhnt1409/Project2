@@ -212,9 +212,40 @@ router.get('/get_list_block', async (req, res) => {
 });
 
 // API search
-router.post('/search', async (req, res) => {
-    const authHeader = req.header("Authorization");
-    let token = authHeader && authHeader.split(" ")[1];
+/**
+ * @swagger
+ * /util/search:
+ *   post:
+ *     summary: Tìm kiếm - search
+ *     description: Tìm kiếm bình luận, tìm kiếm phòng và tìm kiếm người chơi
+ *     tags:
+ *       - Utils
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               token:
+ *                 type: string
+ *                 example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InVzZXI0IiwidXNlcklkIjo3LCJ1dWlkIjoiMDItNTAtMkEtRTItOTUtNkEiLCJpYXQiOjE2ODU4ODA3MTF9.lzgoKlAAsQ0DBrznfYk8xdZQ4IljoDGjRwYx1nqpvhA
+ *               keyword:
+ *                 type: string
+ *                 example: room
+ *               index:
+ *                 type: string
+ *                 example: 6
+ *               count:
+ *                 type: string
+ *                 example: 8
+ *             required: true
+ *     responses:
+ *       200:
+ *         description: Tìm kiếm thành công
+ */
+router.post('/search', verifyToken, wrapAsync(async (req, res) => {
+    // const authHeader = req.header("Authorization");
+    // let token = authHeader && authHeader.split(" ")[1];
     let { keyword, index, count } = req.body;
 
     if((keyword !== 0 && !keyword) || (index !== 0 && !index) || (count !== 0 && !count))
@@ -238,8 +269,8 @@ router.post('/search', async (req, res) => {
 
     try {
         // verify token
-        const decoded = jsonwebtoken.verify(token, JWT_SECRET);
-        console.log(decoded);
+        // const decoded = jsonwebtoken.verify(token, JWT_SECRET);
+        // console.log(decoded);
 
         // keyword = keyword.trim().toLowerCase();
 
@@ -340,6 +371,6 @@ router.post('/search', async (req, res) => {
         console.log(error);
         return callRes(res, responseError.TOKEN_IS_INVALID, null);
     }
-});
+}));
 
 export { router };
