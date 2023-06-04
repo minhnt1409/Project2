@@ -20,4 +20,4 @@ copy file database.sql chạy trên mysql workbench
 
 
 ## DOC API
--    [Danh sách API](http://localhost:3000/api-docs)
+-    [Document API](http://localhost:3000/api-docs)
