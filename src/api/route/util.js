@@ -7,6 +7,9 @@ import path from 'path';
 import fs from 'fs';
 import validInput from '../utils/validInput.js';
 import responseError, { callRes } from '../response/response.js';
+import verifyToken from '../middleware/authMiddleware.js';
+import wrapAsync from '../utils/wrapAsync.js';
+import { ForbiddenError, UnauthorizedError } from '../../common/errors.js';
 
 // Import database connection
 import connection from '../../db/connect.js';
@@ -47,17 +50,17 @@ const JWT_SECRET = 'maBiMat';
  *       200:
  *         description: Report/Báo cáo thành công
  */
-router.post('/report', async (req, res) => {
-    const authHeader = req.header("Authorization");
-    let token = authHeader && authHeader.split(" ")[1];
+router.post('/report', verifyToken, wrapAsync(async (req, res) => {
+    // const authHeader = req.header("Authorization");
+    // let token = authHeader && authHeader.split(" ")[1];
     let { room_id, user_id, content } = req.body;
 
     if(!room_id || !user_id || !content) return callRes(res, responseError.PARAMETER_VALUE_IS_INVALID,null);
 
     try {
         // verify token
-        const decoded = jsonwebtoken.verify(token, JWT_SECRET);
-        console.log(decoded);
+        // const decoded = jsonwebtoken.verify(token, JWT_SECRET);
+        // console.log(decoded);
         
 
         // get data from DB
@@ -72,7 +75,7 @@ router.post('/report', async (req, res) => {
         console.log(error);
         return callRes(res, responseError.TOKEN_IS_INVALID, null);
     }
-});
+}));
 
 // API chặn người chơi(chỉ dành cho admin): set_block
 router.post('/set_block', async (req, res) => {
@@ -111,35 +114,57 @@ router.post('/set_block', async (req, res) => {
 });
 
 // API xem danh sách bị chặn (chỉ dành cho admin): get_list_block
+/**
+ * @swagger
+ * /util/get_list_block:
+ *   get:
+ *     summary: Xem danh sách bị chặn (chỉ dành cho admin)
+ *     description: Xác nhận role Admin của người dùng rồi trả về danh sách
+ *     tags:
+ *       - Utils
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: token
+ *         schema:
+ *           type: string
+ *         description: Token người dùng hiện tại
+ *     responses:
+ *       200:
+ *         description: Thông tin roommate mới, phòng mới và tin mới(news)
+ */
 router.get('/get_list_block', async (req, res) => {
     const authHeader = req.header("Authorization");
     let token = authHeader && authHeader.split(" ")[1];
 
-    // if(!token) return callRes(res, responseError.PARAMETER_VALUE_IS_INVALID,null);
+    if (!token) {
+        token = req.body.token;
+        if (!token) throw new UnauthorizedError();
+    }
 
     try {
         // verify token
-        const decoded = jsonwebtoken.verify(token, JWT_SECRET);
-        console.log(decoded);
+        const decoded = jsonwebtoken.verify(token, process.env.JWT_SECRET);
         const userId = decoded.userId;
-        if(!userId) {
-            user_id = userId;
-        }
+        console.log(decoded.userId);
         
 
         // check admin role
         const query = `SELECT role FROM users 
-                        WHERE id = ${user_id}`;
+                        WHERE id = ${decoded.userId}`;
     
         connection.query(query, function (error, results, fields) {
             if (error) return callRes(res, responseError.UNKNOWN_ERROR, null);
-            if(results[0].role != 'admin') return callRes(res, responseError.NOT_ACCESS, null);
+            if (results[0].role != 'admin') return callRes(res, responseError.NOT_ACCESS, null);
+            // console.log(results[0].role);
         });
 
         // get data from DB
         const query2 = `SELECT id, username, avatar FROM users WHERE is_block = 1`;
 
         connection.query(query2, function (error, results, fields) {
+            console.log(error);
             if (error) return callRes(res, responseError.UNKNOWN_ERROR, null);
             const data = results.map(result => {
                 const { id, username, avatar } = result;

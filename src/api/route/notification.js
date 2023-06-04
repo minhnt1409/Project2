@@ -53,6 +53,14 @@ router.post("/set-read-notification", verifyToken, wrapAsync(async (req, res) =>
  *     description: Lấy thông tin người dùng dựa trên ID
  *     tags:
  *       - Notifications
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: token
+ *         schema:
+ *           type: string
+ *         description: Token người dùng hiện tại
  *     responses:
  *       200:
  *         description: Thông tin roommate mới, phòng mới và tin mới(news)
