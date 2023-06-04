@@ -129,9 +129,46 @@ router.post('/get_comments', verifyToken, wrapAsync(async (req, res) => {
 }));
 
 // API gửi bình luận
+/**
+ * @swagger
+ * /comment/set_comment:
+ *   post:
+ *     summary: Gửi bình luận
+ *     description: Người chơi gửi cho quản trị của phòng và các người chơi khác xem được bình luận này. Chú ý không cho phép bình luận các bình luận, không bày tỏ cảm xúc cho bình luận
+ *     tags:
+ *       - Comments
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               token:
+ *                 type: string
+ *                 example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InVzZXI0IiwidXNlcklkIjo3LCJ1dWlkIjoiMDItNTAtMkEtRTItOTUtNkEiLCJpYXQiOjE2ODU4ODA3MTF9.lzgoKlAAsQ0DBrznfYk8xdZQ4IljoDGjRwYx1nqpvhA
+ *               user_id:
+ *                 type: string
+ *                 example: 2
+ *               content:
+ *                 type: string
+ *                 example: Helloooooo
+ *               room_id:
+ *                 type: string
+ *                 example: 3
+ *               index:
+ *                 type: string
+ *                 example: 0
+ *               count:
+ *                 type: string
+ *                 example: 4
+ *             required: true
+ *     responses:
+ *       200:
+ *         description: Gửi bình luận thành công
+ */
 router.post('/set_comment', verifyToken, async (req, res) => {
-    const authHeader = req.header("Authorization");
-    let token = authHeader && authHeader.split(" ")[1];
+    // const authHeader = req.header("Authorization");
+    // let token = authHeader && authHeader.split(" ")[1];
     var { user_id, content, room_id, index, count} = req.body;
     var user = req.user;
 
@@ -166,17 +203,17 @@ router.post('/set_comment', verifyToken, async (req, res) => {
             comments = results;
             // console.log(comments);
 
-            try {
-                const decoded = jsonwebtoken.verify(token, JWT_SECRET);
-                console.log(decoded);
-                const userId = decoded.userId;
-                if(!userId) {
-                    user_id = userId;
-                }
-            } catch (error) {
-                console.log(error);
-                return callRes(res, responseError.TOKEN_IS_INVALID, null);
-            }
+            // try {
+            //     const decoded = jsonwebtoken.verify(token, JWT_SECRET);
+            //     console.log(decoded);
+            //     const userId = decoded.userId;
+            //     if(!userId) {
+            //         user_id = userId;
+            //     }
+            // } catch (error) {
+            //     console.log(error);
+            //     return callRes(res, responseError.TOKEN_IS_INVALID, null);
+            // }
 
             // Save comment
             let {comment_id, content, author_id, author_name, author_avatar, created} = req.body;
