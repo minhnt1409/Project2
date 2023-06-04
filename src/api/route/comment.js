@@ -65,35 +65,36 @@ router.post('/get_comments', async (req, res) => {
         connection.query(query, function (error, results, fields) {
             if (error) return callRes(res, responseError.UNKNOWN_ERROR, null);
             comments = results;
-        });
+        
 
-        if(!comments) {
-            console.log('Room no have comments');
-            return callRes(res, responseError.NO_DATA_OR_END_OF_LIST_DATA);
-        }
+            if(!comments) {
+                console.log('Room no have comments');
+                return callRes(res, responseError.NO_DATA_OR_END_OF_LIST_DATA);
+            }
 
-        let sliceComments = comments.slice(index, index + count);
+            let sliceComments = comments.slice(index, index + count);
 
-        if(sliceComments.length < 1) {
-            console.log('sliceComments no have comments');
-            return callRes(res, responseError.NO_DATA_OR_END_OF_LIST_DATA);
-        }
+            if(sliceComments.length < 1) {
+                console.log('sliceComments no have comments');
+                return callRes(res, responseError.NO_DATA_OR_END_OF_LIST_DATA);
+            }
 
-        res.status(200).send({
-            code: "1000",
-            message: "OK",
-            data: sliceComments.map(comment => {
-                return {
-                    comment_id: comment.comment_id,
-                    content: comment.content ? comment.content : null,
-                    author: {
-                        id: comment.author_id,
-                        name: comment.author_name ? comment.author_name : null,
-                        avatar: comment.author_avatar ? comment.author_avatar : null
-                    },
-                    created: comment.created.toString(),
-                };
-            })
+            res.status(200).send({
+                code: "1000",
+                message: "OK",
+                data: sliceComments.map(comment => {
+                    return {
+                        comment_id: comment.comment_id,
+                        content: comment.content ? comment.content : null,
+                        author: {
+                            id: comment.author_id,
+                            name: comment.author_name ? comment.author_name : null,
+                            avatar: comment.author_avatar ? comment.author_avatar : null
+                        },
+                        created: comment.created.toString(),
+                    };
+                })
+            });
         });
     } catch (err) {
         console.log(err);
