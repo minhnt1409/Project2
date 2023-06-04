@@ -14,7 +14,8 @@ const JWT_SECRET = 'maBiMat';
 
 // Import database connection
 import connection from '../../db/connect.js';
-import verifyToken from '../middleware/authMiddleware.js'
+import verifyToken from '../middleware/authMiddleware.js';
+import wrapAsync from '../utils/wrapAsync.js';
 
 const router = express.Router();
 
@@ -27,7 +28,7 @@ function dateFormat(date) {
 }
 
 // API lấy các comment
-router.post('/get_comments', async (req, res) => {
+router.post('/get_comments', verifyToken, wrapAsync(async (req, res) => {
     var {token, user_id, index, count, room_id} = req.body;
 
     if(!user_id || (index !== 0 && !index) || (count !== 0 && !count) || (room_id !== 0 && !room_id)) {
@@ -99,10 +100,10 @@ router.post('/get_comments', async (req, res) => {
         console.log(err);
         return callRes(res, responseError.CAN_NOT_CONNECT_TO_DB);
     }
-});
+}));
 
 // API gửi bình luận
-router.post('/set_comment', async (req, res) => {
+router.post('/set_comment', verifyToken, wrapAsync(async (req, res) => {
     var {token, user_id, content, room_id, index, count} = req.body;
     var user = req.user;
 
@@ -225,6 +226,6 @@ router.post('/set_comment', async (req, res) => {
         console.log(err);
         return callRes(res, responseError.CAN_NOT_CONNECT_TO_DB);
     }
-});
+}));
 
 export { router };

@@ -7,6 +7,8 @@ import path from 'path';
 import fs from 'fs';
 import validInput from '../utils/validInput.js';
 import responseError, { callRes, callResNoConvert } from '../response/response.js';
+import verifyToken from '../middleware/authMiddleware.js';
+import wrapAsync from '../utils/wrapAsync.js';
 
 // Import database connection
 import connection from '../../db/connect.js';
@@ -16,15 +18,15 @@ const router = express.Router();
 const JWT_SECRET = 'maBiMat';
 
 // API báo cáo: report
-router.post('/report', async (req, res) => {
+router.post('/report', verifyToken, wrapAsync(async (req, res) => {
     let { token, room_id, user_id, content } = req.body;
 
     if(!token || !room_id || !user_id || !content) return callRes(res, responseError.PARAMETER_VALUE_IS_INVALID,null);
 
     try {
         // verify token
-        const decoded = jsonwebtoken.verify(token, JWT_SECRET);
-        console.log(decoded);
+        // const decoded = jsonwebtoken.verify(token, JWT_SECRET);
+        // console.log(decoded);
         
 
         // get data from DB
@@ -39,10 +41,10 @@ router.post('/report', async (req, res) => {
         console.log(error);
         return callRes(res, responseError.TOKEN_IS_INVALID, null);
     }
-});
+}));
 
 // API chặn người chơi(chỉ dành cho admin): set_block
-router.post('/set_block', async (req, res) => {
+router.post('/set_block', verifyToken, wrapAsync(async (req, res) => {
     let { token, user_id } = req.body;
 
     if(!token || !user_id) return callRes(res, responseError.PARAMETER_VALUE_IS_INVALID,null);
@@ -74,10 +76,10 @@ router.post('/set_block', async (req, res) => {
         console.log(error);
         return callRes(res, responseError.TOKEN_IS_INVALID, null);
     }
-});
+}));
 
 // API xem danh sách bị chặn (chỉ dành cho admin): get_list_block
-router.get('/get_list_block', async (req, res) => {
+router.get('/get_list_block', verifyToken, wrapAsync(async (req, res) => {
     let { token } = req.body;
 
     if(!token) return callRes(res, responseError.PARAMETER_VALUE_IS_INVALID,null);
@@ -118,10 +120,10 @@ router.get('/get_list_block', async (req, res) => {
         console.log(error);
         return callRes(res, responseError.TOKEN_IS_INVALID, null);
     }
-});
+}));
 
 // API search
-router.post('/search', async (req, res) => {
+router.post('/search', verifyToken, wrapAsync(async (req, res) => {
     let { token, keyword, index, count } = req.body;
 
     if(!token || (keyword !== 0 && !keyword) || (index !== 0 && !index) || (count !== 0 && !count))
@@ -247,6 +249,6 @@ router.post('/search', async (req, res) => {
         console.log(error);
         return callRes(res, responseError.TOKEN_IS_INVALID, null);
     }
-});
+}));
 
 export { router };
