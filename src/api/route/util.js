@@ -78,22 +78,51 @@ router.post('/report', verifyToken, wrapAsync(async (req, res) => {
 }));
 
 // API chặn người chơi(chỉ dành cho admin): set_block
+/**
+ * @swagger
+ * /util/set_block:
+ *   post:
+ *     summary: Chặn người chơi (chỉ dành cho admin)
+ *     description: Bloc dựa trên đầu vào là ID người chơi mà admin muốn block
+ *     tags:
+ *       - Utils
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               token:
+ *                 type: string
+ *                 example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InVzZXI0IiwidXNlcklkIjo3LCJ1dWlkIjoiMDItNTAtMkEtRTItOTUtNkEiLCJpYXQiOjE2ODU4ODA3MTF9.lzgoKlAAsQ0DBrznfYk8xdZQ4IljoDGjRwYx1nqpvhA
+ *               user_id:
+ *                 type: string
+ *                 example: 2
+ *             required: true
+ *     responses:
+ *       200:
+ *         description: Block thành công
+ */
 router.post('/set_block', async (req, res) => {
     const authHeader = req.header("Authorization");
     let token = authHeader && authHeader.split(" ")[1];
-    let { user_id } = req.body;
-
-    if(!user_id) return callRes(res, responseError.PARAMETER_VALUE_IS_INVALID,null);
+    let user_id = req.body.user_id;
+    
+    if (!token) {
+        token = req.body.token;
+        if (!token) throw new UnauthorizedError();
+    }
 
     try {
         // verify token
-        const decoded = jsonwebtoken.verify(token, JWT_SECRET);
-        console.log(decoded);
+        const decoded = jsonwebtoken.verify(token, process.env.JWT_SECRET);
+        const userId = decoded.userId;
+        console.log(decoded.userId);
         
 
         // check admin role
         const query = `SELECT role FROM users 
-                        WHERE id = ${user_id}`;
+                        WHERE id = ${decoded.userId}`;
     
         connection.query(query, function (error, results, fields) {
             if (error) return callRes(res, responseError.UNKNOWN_ERROR, null);
