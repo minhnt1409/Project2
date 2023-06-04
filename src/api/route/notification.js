@@ -45,6 +45,18 @@ router.post("/set-read-notification", verifyToken, wrapAsync(async (req, res) =>
 }));
 
 // API xem danh sách thiết lập thông báo
+/**
+ * @swagger
+ * /notification/get_push_settings:
+ *   get:
+ *     summary: Xem danh sách thiết lập thông báo
+ *     description: Lấy thông tin người dùng dựa trên ID
+ *     tags:
+ *       - Notifications
+ *     responses:
+ *       200:
+ *         description: Thông tin roommate mới, phòng mới và tin mới(news)
+ */
 router.get("/get_push_settings", verifyToken, wrapAsync(async (req, res) => {
 
     const query = `

@@ -16,12 +16,43 @@ const router = express.Router();
 const JWT_SECRET = 'maBiMat';
 
 // API báo cáo: report
+/**
+ * @swagger
+ * /util/report:
+ *   post:
+ *     summary: Báo cáo bình luận, báo cáo phòng và báo cáo người chơi
+ *     description: Báo cáo dựa trên đầu vào là ID Room, ID người chơi và nội dung bình luận
+ *     tags:
+ *       - Utils
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               token:
+ *                 type: string
+ *                 example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InVzZXIzIiwidXNlcklkIjo2LCJ1dWlkIjoiMDItNTAtMkEtRTItOTUtNkEiLCJpYXQiOjE2ODQ2NzQ0ODB9.1QDsdFAi-JbKWfrddzXto3ycpVN48VpBuS2Fn4uIHUQ
+ *               room_id:
+ *                 type: string
+ *                 example: 2
+ *               user_id:
+ *                 type: string
+ *                 example: 1
+ *               content:
+ *                 type: string
+ *                 example: WTF not good
+ *             required: true
+ *     responses:
+ *       200:
+ *         description: Report/Báo cáo thành công
+ */
 router.post('/report', async (req, res) => {
     const authHeader = req.header("Authorization");
     let token = authHeader && authHeader.split(" ")[1];
     let { room_id, user_id, content } = req.body;
 
-    if(!token || !room_id || !user_id || !content) return callRes(res, responseError.PARAMETER_VALUE_IS_INVALID,null);
+    if(!room_id || !user_id || !content) return callRes(res, responseError.PARAMETER_VALUE_IS_INVALID,null);
 
     try {
         // verify token
@@ -31,7 +62,7 @@ router.post('/report', async (req, res) => {
 
         // get data from DB
         const query = `SELECT room_id, user_id, content FROM report 
-                        WHERE room_id = ${room_id} AND user_id = ${user_id} AND content = ${content}`;
+                        WHERE room_id = ${room_id} AND user_id = ${user_id} AND content = '${content}'`;
     
         connection.query(query, function (error, results, fields) {
             if (error) return callRes(res, responseError.UNKNOWN_ERROR, null);
@@ -49,7 +80,7 @@ router.post('/set_block', async (req, res) => {
     let token = authHeader && authHeader.split(" ")[1];
     let { user_id } = req.body;
 
-    if(!token || !user_id) return callRes(res, responseError.PARAMETER_VALUE_IS_INVALID,null);
+    if(!user_id) return callRes(res, responseError.PARAMETER_VALUE_IS_INVALID,null);
 
     try {
         // verify token
@@ -84,7 +115,7 @@ router.get('/get_list_block', async (req, res) => {
     const authHeader = req.header("Authorization");
     let token = authHeader && authHeader.split(" ")[1];
 
-    if(!token) return callRes(res, responseError.PARAMETER_VALUE_IS_INVALID,null);
+    // if(!token) return callRes(res, responseError.PARAMETER_VALUE_IS_INVALID,null);
 
     try {
         // verify token
