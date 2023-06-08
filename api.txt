@@ -40,8 +40,10 @@
 	31) submit khảo sát: submit_survey
 
 Trên đây là phân bố API vào các file tương ứng ạ.
+Phân công viết api:
 Minh: 1-8
 anh N.Anh: 9-16
 anh Đạt: 17-24
 anh Đông: 25-31
+
  
