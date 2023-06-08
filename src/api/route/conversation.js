@@ -8,7 +8,37 @@ import execDeleteQuery from '../utils/execDeleteQuery.js';
 
 const router = express.Router();
 
+/**
+ * @swagger
+ * tags:
+ *   name: Hội thoại
+ *   description: API enpoints liên quan đến hội thoại và nhắn tin
+ */
 // Xem danh sách các mail từ một người chơi khác
+/**
+ * @swagger
+ * /conversation/get-list-conversations:
+ *   get:
+ *     summary: Xem mail
+ *     description: Xem danh sách các mail từ một người chơi khác
+ *     tags:
+ *       - Conversations
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               index:
+ *                 type: string
+ *               count:
+ *                 type: string
+ *             required: true
+ *     responses:
+ *       200:
+ *         description: Truy xuất thành công
+ */
 router.get('/get-list-conversations', verifyToken, wrapAsync(async (req, res) => {
   const { index, count } = req.body;
   if (!index || !count) throw new ParameterError(ParameterErrorType.NOT_ENOUGH);
@@ -35,6 +65,34 @@ router.get('/get-list-conversations', verifyToken, wrapAsync(async (req, res) =>
 }));
 
 // Xem danh sách các mail mới nhất từ người chơi còn lại
+/**
+ * @swagger
+ * /conversation/get-conversation-detail:
+ *   get:
+ *     summary: Xem mail của ngiời khác
+ *     description: Xem danh sách các mail mới nhất từ người chơi còn lại
+ *     tags:
+ *       - Conversations
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               partner_id:
+ *                 type: string
+ *               index:
+ *                 type: string
+ *               count:
+ *                 type: string
+ *               conversation_id:
+ *                 type: string
+ *             required: true
+ *     responses:
+ *       200:
+ *         description: Truy xuất thành công
+ */
 router.get('/get-conversation-detail', verifyToken, wrapAsync(async (req, res) => {
   const { partner_id, index, count, conversation_id } = req.body;
   if (!index || !count || (!partner_id && !conversation_id)) throw new ParameterError(ParameterErrorType.NOT_ENOUGH);
@@ -67,6 +125,30 @@ router.get('/get-conversation-detail', verifyToken, wrapAsync(async (req, res) =
 }));
 
 // Xoá danh sách các mail từ một người chơi khác
+/**
+ * @swagger
+ * /conversation/delete-conversation:
+ *   post:
+ *     summary: Xoá mail
+ *     description: Xoá danh sách các mail từ một người chơi khác
+ *     tags:
+ *       - Conversations
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               partner_id:
+ *                 type: string
+ *               conversation_id:
+ *                 type: string
+ *             required: true
+ *     responses:
+ *       200:
+ *         description: Xoá thành công
+ */
 router.post('/delete-conversation', verifyToken, wrapAsync(async (req, res) => {
   const { partner_id, conversation_id } = req.body;
   if (!partner_id && !conversation_id) throw new ParameterError(ParameterErrorType.NOT_ENOUGH);
@@ -103,6 +185,30 @@ router.post('/delete-conversation', verifyToken, wrapAsync(async (req, res) => {
 }));
 
 // Xoá mail từ một người chơi khác
+/**
+ * @swagger
+ * /conversation/delete-message:
+ *   post:
+ *     summary: Xoá mail của người khác
+ *     description: Xoá mail từ một người chơi khác
+ *     tags:
+ *       - Conversations
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               message_id:
+ *                 type: string
+ *               conversation_id:
+ *                 type: string
+ *             required: true
+ *     responses:
+ *       200:
+ *         description: Xoá thành công
+ */
 router.post('/delete-message', verifyToken, wrapAsync(async (req, res) => {
   const { conversation_id, message_id } = req.body;
   if (!conversation_id || !message_id) throw new ParameterError(ParameterErrorType.NOT_ENOUGH);

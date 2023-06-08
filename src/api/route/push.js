@@ -6,7 +6,40 @@ import connection from '../../db/connect.js';
 
 const router = express.Router();
 
+/**
+ * @swagger
+ * tags:
+ *   name: Thông báo đẩy
+ *   description: API enpoints liên quan đến thông báo đẩy
+ */
+
 // Thiết lập thông báo
+/**
+ * @swagger
+ * /push/set-push-setting:
+ *   post:
+ *     summary: Thiết lập thông báo
+ *     description: Thiết lập thông báo
+ *     tags:
+ *       - Pushs
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               new_roommate:
+ *                 type: string
+ *               new_room:
+ *                 type: string
+ *               news:
+ *                 type: string
+ *             required: true
+ *     responses:
+ *       200:
+ *         description: Thiết lập thông báo thành công
+ */
 router.post('/set-push-setting', verifyToken, wrapAsync(async (req, res) => {
   const { new_roommate, new_room, news } = req.body;
   if (!new_roommate && !new_room && !news) throw new ParameterError(ParameterErrorType.NOT_ENOUGH);

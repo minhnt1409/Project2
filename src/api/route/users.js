@@ -71,7 +71,7 @@ router.post('/signup', async (req, res) => {
             if (error) return callRes(res, responseError.UNKNOWN_ERROR, null);
             if (results.length > 0) return callRes(res, responseError.USER_EXISTED, null);
             bcryptjs.hash(password, 10).then(hashedPassword => {
-                connection.query('INSERT INTO users (username, password) VALUE (?, ?)', [ username,hashedPassword ], (error) => {
+                connection.query('INSERT INTO users (username, password) VALUE (?, ?)', [username, hashedPassword], (error) => {
                     if (error) return callRes(res, responseError.UNKNOWN_ERROR, null);
                     return callRes(res, responseError.OK, null);
                 });
@@ -112,7 +112,7 @@ router.post('/login', async (req, res) => {
     const { username, password, uuid } = req.body;
     console.log(req.body);
     console.log(username, password, uuid);
-    
+
     if (!username || !password || !uuid) return callRes(res, responseError.PARAMETER_IS_NOT_ENOUGH, null);
     if (typeof username != 'string' || typeof password != 'string' || typeof uuid != 'string') {
         return callRes(res, responseError.PARAMETER_TYPE_IS_INVALID, null);
@@ -122,7 +122,7 @@ router.post('/login', async (req, res) => {
     connection.query(sql, [username], (err, results) => {
         if (err) return callRes(res, responseError.UNKNOWN_ERROR, null);
         if (results.length === 0) return callRes(res, responseError.USER_IS_NOT_VALIDATED, null);
-        
+
         bcryptjs.compare(password, results[0].password, (err, result) => {
             if (err) return callRes(res, responseError.UNKNOWN_ERROR, null);
             if (result) {
@@ -155,6 +155,32 @@ router.post('/login', async (req, res) => {
 
 
 // API đổi mật khẩu
+/**
+  *  @swagger
+  *  /user/signup:
+  *  post:
+  *      summary: Đổi mật khẩu
+  *      description: Đổi mật khẩu
+  *      tags:
+  *          - Users
+  *      security:
+  *          - BearerAuth: []
+  *      requestBody:
+  *          required: true
+  *          content:
+  *              application/json:
+  *                  schema:
+  *                  type: object
+  *                  propperties:
+  *                      old_password:
+  *                          type: string
+  *                      new_password:
+  *                          type: string
+  *                  required: true
+  *      responses:
+  *          200:
+  *             description: Đổi mật khẩu thành công   
+*/
 router.post('/change_password', verifyToken, wrapAsync(async (req, res) => {
     const { old_password, new_password } = req.body;
     if (!old_password || !new_password) throw new ParameterError(ParameterErrorType.NOT_ENOUGH);
@@ -246,7 +272,7 @@ router.post('/logout', async (req, res) => {
  *       200:
  *         description: Thông tin đã được cập nhật thành công
  */
-  
+
 // Set up multer for file upload
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -272,13 +298,13 @@ router.put('/change_info_after_signup', upload.single('avatar'), async (req, res
             if (!validInput.checkImageFile(req.file)) return callRes(res, responseError.PARAMETER_VALUE_IS_INVALID, null);
             avatar = req.file.filename;
         }
-        if(username) {
+        if (username) {
             if (!validInput.checkUserName(username)) return callRes(res, responseError.PARAMETER_VALUE_IS_INVALID, null);
-            if(typeof username != 'string') return callRes(res, responseError.PARAMETER_TYPE_IS_INVALID, null);
-        } 
-        if(email) {
+            if (typeof username != 'string') return callRes(res, responseError.PARAMETER_TYPE_IS_INVALID, null);
+        }
+        if (email) {
             if (!validInput.checkEmail(email)) return callRes(res, responseError.PARAMETER_VALUE_IS_INVALID, null);
-            if(typeof email != 'string') return callRes(res, responseError.PARAMETER_TYPE_IS_INVALID, null);
+            if (typeof email != 'string') return callRes(res, responseError.PARAMETER_TYPE_IS_INVALID, null);
         }
 
         // Xác thực và giải mã token
@@ -293,17 +319,17 @@ router.put('/change_info_after_signup', upload.single('avatar'), async (req, res
             if (usernameExists[0].length) {
                 return callRes(res, responseError.USER_EXISTED, null);
             }
-    
+
             // Update user info
-            if(username) await connection.promise().query(`UPDATE users SET username = '${username}' WHERE id = ${userId}`);
-            if(email) await connection.promise().query(`UPDATE users SET email = '${email}' WHERE id = ${userId}`);
-            if(avatar) await connection.promise().query(`UPDATE users SET avatar = '${avatar}' WHERE id = ${userId}`);
-    
+            if (username) await connection.promise().query(`UPDATE users SET username = '${username}' WHERE id = ${userId}`);
+            if (email) await connection.promise().query(`UPDATE users SET email = '${email}' WHERE id = ${userId}`);
+            if (avatar) await connection.promise().query(`UPDATE users SET avatar = '${avatar}' WHERE id = ${userId}`);
+
             // Get updated user info
             const [rows] = await connection.promise().query(`SELECT * FROM users WHERE id = ${userId}`);
             const user = rows[0];
             delete user.password;
-    
+
             let data = { avatar: user.avatar }
             callRes(res, responseError.OK, data);
         } catch (error) {
@@ -337,7 +363,7 @@ router.put('/change_info_after_signup', upload.single('avatar'), async (req, res
  *       200:
  *         description: Thông tin người dùng
  */
-  
+
 router.get('/get_user_info', async (req, res) => {
     const authHeader = req.header("Authorization");
     let token = authHeader && authHeader.split(" ")[1];
@@ -348,12 +374,12 @@ router.get('/get_user_info', async (req, res) => {
         console.log(decoded);
         const userId = decoded.userId;
 
-        if(!user_id){
+        if (!user_id) {
             user_id = userId;
         }
-        
+
         const query = `SELECT id, username, avatar, email FROM users WHERE id = ${user_id}`;
-    
+
         connection.query(query, function (error, results, fields) {
             if (error) return callRes(res, responseError.UNKNOWN_ERROR, null);
             callRes(res, responseError.OK, results[0]);
