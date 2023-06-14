@@ -185,3 +185,28 @@ VALUES
 ('John', 'Room 101', 'New patient moved to new room'),
 ('Jane', NULL, "Patient's health is good"),
 (NULL, 'Room 103', 'New room is available');
+
+CREATE TABLE IF NOT EXISTS survey (
+  id INT NOT NULL AUTO_INCREMENT,
+  type INT(2) NOT NULL,
+  content VARCHAR(255) NOT NULL,
+  options_id INT ,
+);
+CREATE TABLE IF NOT EXISTS options(
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  options_id INT ,
+  answer VARCHAR(250) NOT NULL,
+)
+INSERT INTO survey(id,type,content,options_id)
+VALUES
+('1','1','khao sat 1',NULL),
+('2','0','khao sat 1','1'),
+('3','1','khao sat 2',NULL),
+('4','0','khao sat 3','2'),
+INSERT INTO options(options_id,answer)
+VALUES
+('1','A'),
+('1','B'),
+('1','C'),
+('2','A'),
+('2','B')
