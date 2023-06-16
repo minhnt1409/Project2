@@ -8,7 +8,7 @@ dotenv.config();
 const connection = mysql.createConnection({
     host: 'localhost',
     user: 'root',
-    password: 'root',
+    password: 'dong2605',
     database: 'api',
 });
 
