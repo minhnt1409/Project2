@@ -131,17 +131,18 @@ INSERT INTO rooms (room_name, current, max, speed, author_id, author_name)
 VALUES ('room3', 1, 25, 1, 6, 'admin3');
 
 INSERT INTO conversations (user1_id, user2_id) VALUES
-  (5, 7);
+  (1, 2);
   
-INSERT INTO messages (conversation_id, sender_id, content, created, unread) VALUES
-  (4, 5, 'alo', '2023-04-23 10:00:00', true),
-  (4, 7, 'alooo', '2023-04-23 10:02:00', false);
+INSERT INTO messages (conversation_id, sender_id, content, createdmessages, unread) VALUES
+  (1, 1, 'alo', '2023-04-23 10:00:00', true),
+  (1, 2, 'alooo', '2023-04-23 10:02:00', false);
   
 INSERT INTO Notifications (type, content, unread, url, object_id)
 VALUES 
     (0, 'New roomate: admin1', true, '', '1'),
     (1, 'New room: Room 101', false, '/room/101', '2'),
     (2, "It's lunch time!", false, '/room/99', '3');
+    
 INSERT INTO Push (new_roommate, new_room, news)
 VALUES
 ('John', 'Room 101', 'New patient moved to new room'),
@@ -150,7 +151,7 @@ VALUES
 
 INSERT INTO report (user_id, room_id, content)
 VALUES
-('1', '2', 'WTF not good');
+('1', '2', 'Test Report');
 
 INSERT INTO comments (comment_id, created, content, room_id, author_name, author_id, author_avatar)
 VALUES

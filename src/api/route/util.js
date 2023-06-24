@@ -57,18 +57,18 @@ router.post('/report', verifyToken, wrapAsync(async (req, res) => {
     // let token = authHeader && authHeader.split(" ")[1];
     let { room_id, user_id, content } = req.body;
 
-    if(!room_id || !user_id || !content) return callRes(res, responseError.PARAMETER_VALUE_IS_INVALID,null);
+    if (!room_id || !user_id || !content) return callRes(res, responseError.PARAMETER_VALUE_IS_INVALID, null);
 
     try {
         // verify token
         // const decoded = jsonwebtoken.verify(token, JWT_SECRET);
         // console.log(decoded);
-        
+
 
         // get data from DB
         const query = `SELECT room_id, user_id, content FROM report 
                         WHERE room_id = ${room_id} AND user_id = ${user_id} AND content = '${content}'`;
-    
+
         connection.query(query, function (error, results, fields) {
             if (error) return callRes(res, responseError.UNKNOWN_ERROR, null);
             callRes(res, responseError.OK);
@@ -109,7 +109,7 @@ router.post('/set_block', async (req, res) => {
     const authHeader = req.header("Authorization");
     let token = authHeader && authHeader.split(" ")[1];
     let user_id = req.body.user_id;
-    
+
     if (!token) {
         token = req.body.token;
         if (!token) throw new UnauthorizedError();
@@ -120,15 +120,15 @@ router.post('/set_block', async (req, res) => {
         const decoded = jsonwebtoken.verify(token, process.env.JWT_SECRET);
         const userId = decoded.userId;
         console.log(decoded.userId);
-        
+
 
         // check admin role
         const query = `SELECT role FROM users 
                         WHERE id = ${decoded.userId}`;
-    
+
         connection.query(query, function (error, results, fields) {
             if (error) return callRes(res, responseError.UNKNOWN_ERROR, null);
-            if(results[0].role != 'admin') return callRes(res, responseError.NOT_ACCESS, null);
+            if (results[0].role != 'admin') return callRes(res, responseError.NOT_ACCESS, null);
         });
 
         // update user's state in DB
@@ -179,12 +179,12 @@ router.get('/get_list_block', async (req, res) => {
         const decoded = jsonwebtoken.verify(token, process.env.JWT_SECRET);
         const userId = decoded.userId;
         console.log(decoded.userId);
-        
+
 
         // check admin role
         const query = `SELECT role FROM users 
                         WHERE id = ${decoded.userId}`;
-    
+
         connection.query(query, function (error, results, fields) {
             if (error) return callRes(res, responseError.UNKNOWN_ERROR, null);
             if (results[0].role != 'admin') return callRes(res, responseError.NOT_ACCESS, null);
@@ -199,7 +199,7 @@ router.get('/get_list_block', async (req, res) => {
             if (error) return callRes(res, responseError.UNKNOWN_ERROR, null);
             const data = results.map(result => {
                 const { id, username, avatar } = result;
-                return { 
+                return {
                     user_id: id,
                     username: username,
                     avatar: avatar
@@ -250,17 +250,17 @@ router.post('/search', verifyToken, wrapAsync(async (req, res) => {
     // let token = authHeader && authHeader.split(" ")[1];
     let { keyword, index, count } = req.body;
 
-    if((keyword !== 0 && !keyword) || (index !== 0 && !index) || (count !== 0 && !count))
+    if ((keyword !== 0 && !keyword) || (index !== 0 && !index) || (count !== 0 && !count))
         return callRes(res, responseError.PARAMETER_IS_NOT_ENOUGH, null);
 
-    if(!validInput.checkNumber(index) || !validInput.checkNumber(count)) {
+    if (!validInput.checkNumber(index) || !validInput.checkNumber(count)) {
         console.log("chi chua cac ki tu so");
         return setAndSendResponse(res, responseError.PARAMETER_VALUE_IS_INVALID);
     }
 
     index = parseInt(index, 10);
     count = parseInt(count, 10);
-    if(isNaN(index) || isNaN(count)) {
+    if (isNaN(index) || isNaN(count)) {
         console.log("PARAMETER_VALUE_IS_INVALID");
         return setAndSendResponse(res, responseError.PARAMETER_VALUE_IS_INVALID);
     }
@@ -285,14 +285,14 @@ router.post('/search', verifyToken, wrapAsync(async (req, res) => {
                 const { comment_id, content, author_name, author_id, author_avatar, created } = result;
                 return {
                     // comments: {
-                        comment_id: comment_id,
-                        content: content,
-                        author: {
-                            username: author_name,
-                            id: author_id,
-                            avatar: author_avatar
-                        },
-                        created: created
+                    comment_id: comment_id,
+                    content: content,
+                    author: {
+                        username: author_name,
+                        id: author_id,
+                        avatar: author_avatar
+                    },
+                    created: created
                     // }
                 };
             });
@@ -313,17 +313,17 @@ router.post('/search', verifyToken, wrapAsync(async (req, res) => {
                 const { room_id, room_name, current, max, speed, author_id, author_name = 'Naaa', created, modified } = result;
                 return {
                     // rooms: {
-                        room_id: room_id,
-                        room_name: room_name,
-                        current: current,
-                        max: max,
-                        speed: speed,
-                        author: {
-                            username: author_name,
-                            id: author_id,
-                        },
-                        created: created,
-                        modified: modified
+                    room_id: room_id,
+                    room_name: room_name,
+                    current: current,
+                    max: max,
+                    speed: speed,
+                    author: {
+                        username: author_name,
+                        id: author_id,
+                    },
+                    created: created,
+                    modified: modified
                     // }
                 };
             });
@@ -341,10 +341,10 @@ router.post('/search', verifyToken, wrapAsync(async (req, res) => {
                 const { id, username, email, avatar } = result;
                 return {
                     // users: {
-                        user_id: id,
-                        username: username,
-                        email: email,
-                        avatar: avatar
+                    user_id: id,
+                    username: username,
+                    email: email,
+                    avatar: avatar
                     // }
                 };
             });
@@ -386,7 +386,7 @@ router.post('/search', verifyToken, wrapAsync(async (req, res) => {
  *       - Utils
  *     security:
  *       - BearerAuth: []
- *    parameters:
+ *     parameters:
  *       - in: query
  *         name: token
  *         schema:
@@ -396,16 +396,16 @@ router.post('/search', verifyToken, wrapAsync(async (req, res) => {
  *       200:
  *         description: Lấy danh sách task thành công
  */
-router.get('/get_list_task' , wrapAsync(async(req, res) => {
-  
-    let {token} = req.body;
+router.get('/get_list_task', wrapAsync(async (req, res) => {
+
+    let { token } = req.body;
     console.log(token)
     if (!token) return callRes(res, responseError.PARAMETER_VALUE_IS_INVALID, null);
-    const query=`SELECT * FROM tasks`
+    const query = `SELECT * FROM tasks`
     connection.query(query, (err, results) => {
-        console.log(err,results)
+        console.log(err, results)
         if (err) return callRes(res, responseError.UNKNOWN_ERROR, null);
-        const tasks = results.map(task => ({ task_id: task.task_id, task_name: task.task_name,begin:task.begin_at,end:task.end_at }));
+        const tasks = results.map(task => ({ task_id: task.task_id, task_name: task.task_name, begin: task.begin_at, end: task.end_at }));
         let data = { tasks: tasks };
         return callRes(res, responseError.OK, data);
     });
@@ -416,59 +416,59 @@ router.get('/get_list_task' , wrapAsync(async(req, res) => {
  * @swagger
  * /util/get_score:
  *    get: 
- *     summary: Lấy điểm người chơi
- *     description: Lấy điểm người chơi với quyền admin
- *     tags:
- *       - Utils
- *     security:
- *       - BearerAuth: []
- *     parameters:
+ *      summary: Lấy điểm người chơi
+ *      description: Lấy điểm người chơi với quyền admin
+ *      tags:
+ *        - Utils
+ *      security:
+ *        - BearerAuth: []
+ *      parameters:
+ *        - in: query
+ *          name: token
+ *          schema:
+ *             type: string
+ *          description: Token người dùng hiện tại
+ *        - in: query
+ *          name: user_id
+ *          schema:
+ *            type: string
+ *          description: ID người dùng (mặc định là ID của người dùng đang xác thực)
  *       - in: query
- *         name: token
- *         schema:
- *           type: string
- *         description: Token người dùng hiện tại
- *      - in: query
- *         name: user_id
- *         schema:
- *           type: string
- *         description: ID người dùng (mặc định là ID của người dùng đang xác thực)
- *      - in: query
- *         name: index
- *         schema:
- *           type: integer
- *         description: Vị trí bắt đầu của danh sách phòng (mặc định là 0)
- *       - in: query
- *         name: count
- *         schema:
- *           type: integer
- *         description: Số lượng phòng cần lấy (mặc định là 20)
- *     responses:
- *       200:
- *         description: Lấy điểm thành công
+ *          name: index
+ *          schema:
+ *            type: integer
+ *          description: Vị trí bắt đầu của danh sách phòng (mặc định là 0)
+ *        - in: query
+ *          name: count
+ *          schema:
+ *            type: integer
+ *          description: Số lượng phòng cần lấy (mặc định là 20)
+ *      responses:
+ *        200:
+ *          description: Lấy điểm thành công
  */
 router.get('/get_score', async (req, res) => {
-    let {token, index,count,user_id } = req.body;
-   
+    let { token, index, count, user_id } = req.body;
+
     try {
         const decoded = jsonwebtoken.verify(token, JWT_SECRET);
         console.log(decoded);
         const query = `SELECT role FROM users WHERE id = ${user_id}`;
 
-        connection.query(query,function (err, results, fields)  {
-          
+        connection.query(query, function (err, results, fields) {
+
             if (err) return callRes(res, responseError.UNKNOWN_ERROR, null);
-            
-            if(results[0].role != 'admin') return callRes(res, responseError.NOT_ACCESS, null);
-            const query2=`SELECT * FROM score `
-                connection.query(query2, (err, results) => {
-                    if (err) return callRes(res, responseError.UNKNOWN_ERROR, null);
-                   console.log(results)
-                     const data = results.map(score=>({ room_id: score.room_id,score:score.last_score,createAt:score.created_at }));
-                    
-                     return callRes(res, responseError.OK, data);
-                });
-                })
+
+            if (results[0].role != 'admin') return callRes(res, responseError.NOT_ACCESS, null);
+            const query2 = `SELECT * FROM score `
+            connection.query(query2, (err, results) => {
+                if (err) return callRes(res, responseError.UNKNOWN_ERROR, null);
+                console.log(results)
+                const data = results.map(score => ({ room_id: score.room_id, score: score.last_score, createAt: score.created_at }));
+
+                return callRes(res, responseError.OK, data);
+            });
+        })
     } catch (error) {
         console.log(error);
         return callRes(res, responseError.TOKEN_IS_INVALID, null);
@@ -495,12 +495,12 @@ router.get('/get_score', async (req, res) => {
  *       200:
  *         description: Lấy điểm thành công
  */
-router.get('/get_survey' , wrapAsync(async(req, res) => {
-  
-    let {token} = req.body;
+router.get('/get_survey', wrapAsync(async (req, res) => {
+
+    let { token } = req.body;
     console.log(token)
     if (!token) return callRes(res, responseError.PARAMETER_VALUE_IS_INVALID, null);
-    const query=`
+    const query = `
     SELECT  survey.id,survey.options_id as options, content, type, ops.answer as 'option'
     FROM survey 
     LEFT JOIN  (
@@ -509,9 +509,9 @@ router.get('/get_survey' , wrapAsync(async(req, res) => {
         )  AS ops 
     ON survey.options_id=ops.options_id `
     connection.query(query, (err, results) => {
-        console.log(err,results) 
+        console.log(err, results)
         if (err) return callRes(res, responseError.UNKNOWN_ERROR, null);
-        const tasks = results.map(items => ({ id: items.id, options: items.options,content:items.content,type:items.type,option:items.option }));
+        const tasks = results.map(items => ({ id: items.id, options: items.options, content: items.content, type: items.type, option: items.option }));
         let data = { tasks: tasks };
         return callRes(res, responseError.OK, data);
     });
@@ -547,19 +547,19 @@ router.get('/get_survey' , wrapAsync(async(req, res) => {
  *       200:
  *         description: Lấy điểm thành công
  */
-router.post('/submit_survey' , wrapAsync(async(req, res) => {
-  
-    let {token,id,option} = req.body;
+router.post('/submit_survey', wrapAsync(async (req, res) => {
+
+    let { token, id, option } = req.body;
     console.log(token)
     if (!token) return callRes(res, responseError.PARAMETER_VALUE_IS_INVALID, null);
-    const query=`
+    const query = `
     INSERT INTO answer (option_choice)
     VALUES ('${option}')`
     connection.query(query, (err, results) => {
-        console.log(err,results) 
+        console.log(err, results)
         if (err) return callRes(res, responseError.UNKNOWN_ERROR, null);
         return res.status(200).json({ code: 1000, message: 'OK' });
-        
+
     });
 }));
 // Gửi thông tin tọa độ
@@ -588,18 +588,18 @@ router.post('/submit_survey' , wrapAsync(async(req, res) => {
  *       200:
  *         description: Lấy điểm thành công
  */
-router.post('/update_position' , wrapAsync(async(req, res) => {
-    let {token,position} = req.body;
+router.post('/update_position', wrapAsync(async (req, res) => {
+    let { token, position } = req.body;
     console.log(token)
     if (!token) return callRes(res, responseError.PARAMETER_VALUE_IS_INVALID, null);
-    const query=`
+    const query = `
     INSERT INTO position (x,y,z)
     VALUES ('${position.x}','${position.y}','${position.z}')`
     connection.query(query, (err, results) => {
-        console.log(err,results) 
+        console.log(err, results)
         if (err) return callRes(res, responseError.UNKNOWN_ERROR, null);
         return res.status(200).json({ code: 1000, message: 'OK' });
-        
+
     });
 }));
 export { router };
