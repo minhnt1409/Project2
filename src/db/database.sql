@@ -105,6 +105,52 @@ CREATE TABLE IF NOT EXISTS push (
     PRIMARY KEY (id)
 );
 
+CREATE TABLE tasks (
+  task_id INT NOT NULL AUTO_INCREMENT,
+  task_name VARCHAR(100) NOT NULL,
+  current INT DEFAULT(1),
+  begin_at VARCHAR(255),
+  end_at VARCHAR(255),
+  PRIMARY KEY (task_id)
+);
+
+CREATE TABLE score (
+score_id INT NOT NULL AUTO_INCREMENT primary key ,
+  last_score INT ,
+  room_id INT,
+  created_at VARCHAR(255)
+);
+
+CREATE TABLE IF NOT EXISTS survey (
+  id INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
+  type INT(2) NOT NULL,
+  content VARCHAR(255) NOT NULL,
+  options_id INT
+);
+
+CREATE TABLE IF NOT EXISTS options(
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  options_id INT ,
+  answer VARCHAR(250) NOT NULL
+);
+
+CREATE TABLE answer (
+  id int NOT NULL AUTO_INCREMENT,
+  option_choice varchar(255) NOT NULL,
+  answer varchar(255) DEFAULT NULL,
+  PRIMARY KEY (id)
+);
+
+CREATE TABLE position (
+   id INT NOT NULL primary KEY AUTO_INCREMENT,
+   x int NOT NULL,
+   y int not null,
+   z int not null
+);
+
+INSERT INTO position (x,y,z) VALUES (1,2,3);
+INSERT INTO position (x,y,z) VALUES (3,4,7);
+
 INSERT INTO users (username, password, role, is_block)
 VALUES ('user1', '1', 'user', 0);
 
@@ -155,4 +201,25 @@ VALUES
 
 INSERT INTO comments (comment_id, created, content, room_id, author_name, author_id, author_avatar)
 VALUES
-('1', '2023-04-23 10:02:00', 'Mi room 3', '3', 'Na', '2', 'abc.png');
+('1', '2023-04-23 10:02:00', 'Mi room 3', '3', 'Na', '2', 'abc.png'),
+('2', '2023-04-23 10:02:00', 'Mi room 2', '3', 'Na2', '2', 'abc.png'),
+('3', '2023-04-23 10:02:00', 'Mi room 1', '3', 'Na1', '2', 'abc.png');
+
+INSERT INTO survey(id,type,content,options_id)
+VALUES
+('1','1','khao sat 1',NULL),
+('2','0','khao sat 1','1'),
+('3','1','khao sat 2',NULL),
+('4','0','khao sat 3','2');
+
+INSERT INTO options(options_id,answer)
+VALUES
+('1','A'),
+('1','B'),
+('1','C'),
+('2','A'),
+('2','B');
+
+INSERT INTO tasks (task_id,task_name,current,begin_at,end_at) VALUES (1,'lam nvu',0,'19:00','19:45');
+
+INSERT INTO score (score_id,last_score,room_id,created_at) VALUES (1,9,2,'19:45');

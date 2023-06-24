@@ -42,9 +42,6 @@ function dateFormat(date) {
  *           schema:
  *             type: object
  *             properties:
- *               token:
- *                 type: string
- *                 example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InVzZXI0IiwidXNlcklkIjo3LCJ1dWlkIjoiMDItNTAtMkEtRTItOTUtNkEiLCJpYXQiOjE2ODU4ODA3MTF9.lzgoKlAAsQ0DBrznfYk8xdZQ4IljoDGjRwYx1nqpvhA
  *               user_id:
  *                 type: string
  *                 example: 2
@@ -143,9 +140,6 @@ router.post('/get_comments', verifyToken, wrapAsync(async (req, res) => {
  *           schema:
  *             type: object
  *             properties:
- *               token:
- *                 type: string
- *                 example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InVzZXI0IiwidXNlcklkIjo3LCJ1dWlkIjoiMDItNTAtMkEtRTItOTUtNkEiLCJpYXQiOjE2ODU4ODA3MTF9.lzgoKlAAsQ0DBrznfYk8xdZQ4IljoDGjRwYx1nqpvhA
  *               user_id:
  *                 type: string
  *                 example: 2

@@ -35,9 +35,6 @@ const JWT_SECRET = 'maBiMat';
  *           schema:
  *             type: object
  *             properties:
- *               token:
- *                 type: string
- *                 example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InVzZXIzIiwidXNlcklkIjo2LCJ1dWlkIjoiMDItNTAtMkEtRTItOTUtNkEiLCJpYXQiOjE2ODQ2NzQ0ODB9.1QDsdFAi-JbKWfrddzXto3ycpVN48VpBuS2Fn4uIHUQ
  *               room_id:
  *                 type: string
  *                 example: 2
@@ -53,18 +50,11 @@ const JWT_SECRET = 'maBiMat';
  *         description: Report/Báo cáo thành công
  */
 router.post('/report', verifyToken, wrapAsync(async (req, res) => {
-    // const authHeader = req.header("Authorization");
-    // let token = authHeader && authHeader.split(" ")[1];
     let { room_id, user_id, content } = req.body;
 
     if(!room_id || !user_id || !content) return callRes(res, responseError.PARAMETER_VALUE_IS_INVALID,null);
 
     try {
-        // verify token
-        // const decoded = jsonwebtoken.verify(token, JWT_SECRET);
-        // console.log(decoded);
-        
-
         // get data from DB
         const query = `SELECT room_id, user_id, content FROM report 
                         WHERE room_id = ${room_id} AND user_id = ${user_id} AND content = '${content}'`;
@@ -94,9 +84,6 @@ router.post('/report', verifyToken, wrapAsync(async (req, res) => {
  *           schema:
  *             type: object
  *             properties:
- *               token:
- *                 type: string
- *                 example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InVzZXI0IiwidXNlcklkIjo3LCJ1dWlkIjoiMDItNTAtMkEtRTItOTUtNkEiLCJpYXQiOjE2ODU4ODA3MTF9.lzgoKlAAsQ0DBrznfYk8xdZQ4IljoDGjRwYx1nqpvhA
  *               user_id:
  *                 type: string
  *                 example: 2
@@ -155,12 +142,6 @@ router.post('/set_block', async (req, res) => {
  *       - Utils
  *     security:
  *       - BearerAuth: []
- *     parameters:
- *       - in: query
- *         name: token
- *         schema:
- *           type: string
- *         description: Token người dùng hiện tại
  *     responses:
  *       200:
  *         description: Thông tin roommate mới, phòng mới và tin mới(news)
@@ -169,10 +150,7 @@ router.get('/get_list_block', async (req, res) => {
     const authHeader = req.header("Authorization");
     let token = authHeader && authHeader.split(" ")[1];
 
-    if (!token) {
-        token = req.body.token;
-        if (!token) throw new UnauthorizedError();
-    }
+    if (!token) throw new UnauthorizedError();
 
     try {
         // verify token
@@ -228,9 +206,6 @@ router.get('/get_list_block', async (req, res) => {
  *           schema:
  *             type: object
  *             properties:
- *               token:
- *                 type: string
- *                 example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InVzZXI0IiwidXNlcklkIjo3LCJ1dWlkIjoiMDItNTAtMkEtRTItOTUtNkEiLCJpYXQiOjE2ODU4ODA3MTF9.lzgoKlAAsQ0DBrznfYk8xdZQ4IljoDGjRwYx1nqpvhA
  *               keyword:
  *                 type: string
  *                 example: room
@@ -386,21 +361,12 @@ router.post('/search', verifyToken, wrapAsync(async (req, res) => {
  *       - Utils
  *     security:
  *       - BearerAuth: []
- *     parameters:
- *       - in: query
- *         name: token
- *         schema:
- *           type: string
- *         description: Token người dùng hiện tại
  *     responses:
  *       200:
  *         description: Lấy danh sách task thành công
  */
-router.get('/get_list_task' , wrapAsync(async(req, res) => {
+router.get('/get_list_task', verifyToken , wrapAsync(async(req, res) => {
   
-    let {token} = req.body;
-    console.log(token)
-    if (!token) return callRes(res, responseError.PARAMETER_VALUE_IS_INVALID, null);
     const query=`SELECT * FROM tasks`
     connection.query(query, (err, results) => {
         console.log(err,results)
@@ -424,11 +390,6 @@ router.get('/get_list_task' , wrapAsync(async(req, res) => {
  *       - BearerAuth: []
  *     parameters:
  *       - in: query
- *         name: token
- *         schema:
- *           type: string
- *         description: Token người dùng hiện tại
- *       - in: query
  *         name: user_id
  *         schema:
  *           type: string
@@ -447,18 +408,17 @@ router.get('/get_list_task' , wrapAsync(async(req, res) => {
  *       200:
  *         description: Lấy điểm thành công
  */
-router.get('/get_score', async (req, res) => {
-    let {token, index,count,user_id } = req.body;
+router.get('/get_score', verifyToken, async (req, res) => {
+    // let {index,count,user_id } = req.body;
+    const user_id = req.query.user_id;
+    console.log(user_id, req.userId);
    
     try {
-        const decoded = jsonwebtoken.verify(token, JWT_SECRET);
-        console.log(decoded);
         const query = `SELECT role FROM users WHERE id = ${user_id}`;
 
         connection.query(query,function (err, results, fields)  {
-          
+            console.log(results);
             if (err) return callRes(res, responseError.UNKNOWN_ERROR, null);
-            
             if(results[0].role != 'admin') return callRes(res, responseError.NOT_ACCESS, null);
             const query2=`SELECT * FROM score `
                 connection.query(query2, (err, results) => {
@@ -468,7 +428,7 @@ router.get('/get_score', async (req, res) => {
                     
                      return callRes(res, responseError.OK, data);
                 });
-                })
+            })
     } catch (error) {
         console.log(error);
         return callRes(res, responseError.TOKEN_IS_INVALID, null);
@@ -485,21 +445,11 @@ router.get('/get_score', async (req, res) => {
  *       - Utils
  *     security:
  *       - BearerAuth: []
- *     parameters:
- *       - in: query
- *         name: token
- *         schema:
- *           type: string
- *         description: Token người dùng hiện tại
  *     responses:
  *       200:
  *         description: Lấy điểm thành công
  */
-router.get('/get_survey' , wrapAsync(async(req, res) => {
-  
-    let {token} = req.body;
-    console.log(token)
-    if (!token) return callRes(res, responseError.PARAMETER_VALUE_IS_INVALID, null);
+router.get('/get_survey' ,verifyToken, wrapAsync(async(req, res) => {
     const query=`
     SELECT  survey.id,survey.options_id as options, content, type, ops.answer as 'option'
     FROM survey 
@@ -529,11 +479,6 @@ router.get('/get_survey' , wrapAsync(async(req, res) => {
  *       - BearerAuth: []
  *     parameters:
  *       - in: query
- *         name: token
- *         schema:
- *           type: string
- *         description: Token người dùng hiện tại
- *       - in: query
  *         name: id
  *         schema:
  *           type: string
@@ -547,11 +492,11 @@ router.get('/get_survey' , wrapAsync(async(req, res) => {
  *       200:
  *         description: Lấy điểm thành công
  */
-router.post('/submit_survey' , wrapAsync(async(req, res) => {
+router.post('/submit_survey' , verifyToken, wrapAsync(async(req, res) => {
   
-    let {token,id,option} = req.body;
-    console.log(token)
-    if (!token) return callRes(res, responseError.PARAMETER_VALUE_IS_INVALID, null);
+    // let {token,id,option} = req.body;
+    const id = req.body.id || req.query.id;
+    const option = req.body.option || req.query.option;
     const query=`
     INSERT INTO answer (option_choice)
     VALUES ('${option}')`
@@ -575,11 +520,6 @@ router.post('/submit_survey' , wrapAsync(async(req, res) => {
  *       - BearerAuth: []
  *     parameters:
  *       - in: query
- *         name: token
- *         schema:
- *           type: string
- *         description: Token người dùng hiện tại
- *       - in: query
  *         name: position
  *         schema:
  *           type: string
@@ -588,13 +528,14 @@ router.post('/submit_survey' , wrapAsync(async(req, res) => {
  *       200:
  *         description: Lấy điểm thành công
  */
-router.post('/update_position' , wrapAsync(async(req, res) => {
-    let {token,position} = req.body;
-    console.log(token)
-    if (!token) return callRes(res, responseError.PARAMETER_VALUE_IS_INVALID, null);
-    const query=`
-    INSERT INTO position (x,y,z)
-    VALUES ('${position.x}','${position.y}','${position.z}')`
+router.post('/update_position' , verifyToken, wrapAsync(async(req, res) => {
+    const position = req.body.position || req.query.position;
+    let parts = position.split("-")
+    let x = parseInt(parts[0])
+    let y = parseInt(parts[1])
+    let z = parseInt(parts[2])
+    console.log(x,y,z);
+    const query=`INSERT INTO api.position(x,y,z) VALUES (${x},${y},${z})`;
     connection.query(query, (err, results) => {
         console.log(err,results) 
         if (err) return callRes(res, responseError.UNKNOWN_ERROR, null);

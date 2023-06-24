@@ -11,7 +11,7 @@ import fs from 'fs';
 const router = express.Router();
 
 // Lấy được thông báo từ hệ thống
-router.get("/get-notification", verifyToken, wrapAsync(async (req, res) => {
+router.get("/get_notification", verifyToken, wrapAsync(async (req, res) => {
   const { index, count } = req.body;
   if (!index || !count) throw new ParameterError(ParameterErrorType.NOT_ENOUGH);
   if (typeof index !== 'string' || typeof count !== 'string') throw new ParameterError(ParameterErrorType.INVALID_TYPE);
@@ -32,7 +32,7 @@ router.get("/get-notification", verifyToken, wrapAsync(async (req, res) => {
 }));
 
 // Thiết lập đã đọc được thông báo
-router.post("/set-read-notification", verifyToken, wrapAsync(async (req, res) => {
+router.post("/set_read_notification", verifyToken, wrapAsync(async (req, res) => {
   const { notification_id } = req.body;
   if (!notification_id) throw new ParameterError(ParameterErrorType.NOT_ENOUGH);
   if (typeof notification_id !== 'string') throw new ParameterError(ParameterErrorType.INVALID_TYPE);
@@ -59,12 +59,6 @@ router.post("/set-read-notification", verifyToken, wrapAsync(async (req, res) =>
  *       - Notifications
  *     security:
  *       - BearerAuth: []
- *     parameters:
- *       - in: query
- *         name: token
- *         schema:
- *           type: string
- *         description: Token người dùng hiện tại
  *     responses:
  *       200:
  *         description: Thông tin roommate mới, phòng mới và tin mới(news)
@@ -93,7 +87,7 @@ const JWT_SECRET = 'maBiMat';
 // API thiết lập đã đọc được thông báo
 /**
  * @swagger
- * /notification/set-read-message:
+ * /notification/set_read_message:
  *   get:
  *     summary:  thiết lập đã đọc được thông báo
  *     description:  thiết lập người chơi đã đọc được thông báo
@@ -103,23 +97,18 @@ const JWT_SECRET = 'maBiMat';
  *       - BearerAuth: []
  *     parameters:
  *       - in: query
- *         name: token
- *         schema:
- *           type: string
- *         description: Token người dùng hiện tại
- *       - in: query
  *         name: message_id
  *         schema:
  *           type: string
  *         description: id của thông báo
  *     responses:
  *       200:
- *         description: Lấy điểm thành công
+ *         description: thiết lập đã đọc được thông báo
  */
 // Thiết lập đã đọc được thông báo
-router.post("/set-read-message", wrapAsync(async (req, res) => {
-  const { message_id } = req.body;
-  if (!message_id) throw new ParameterError(ParameterErrorType.NOT_ENOUGH);
+router.get("/set_read_message", verifyToken , wrapAsync(async (req, res) => {
+  const message_id = req.body.message_id || req.query.message_id;
+  if (!message_id) return callRes(res, responseError.PARAMETER_IS_NOT_ENOUGH, null);
   if (typeof message_id !== 'string') throw new ParameterError(ParameterErrorType.INVALID_TYPE);
 console.log(message_id)
   const query = `

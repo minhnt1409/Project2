@@ -157,8 +157,8 @@ router.post('/login', async (req, res) => {
 // API đổi mật khẩu
 /**
   *  @swagger
-  *  /user/signup:
-  *  post:
+  *  /user/change_password:
+  *    post:
   *      summary: Đổi mật khẩu
   *      description: Đổi mật khẩu
   *      tags:
@@ -170,12 +170,12 @@ router.post('/login', async (req, res) => {
   *          content:
   *              application/json:
   *                  schema:
-  *                  type: object
-  *                  propperties:
-  *                      old_password:
-  *                          type: string
-  *                      new_password:
-  *                          type: string
+  *                      type: object
+  *                      properties:
+  *                         old_password:
+  *                             type: string
+  *                         new_password:
+  *                             type: string
   *                  required: true
   *      responses:
   *          200:
@@ -267,7 +267,6 @@ router.post('/logout', async (req, res) => {
  *                 type: string
  *               email:
  *                 type: string
- *             required: true
  *     responses:
  *       200:
  *         description: Thông tin đã được cập nhật thành công

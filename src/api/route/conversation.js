@@ -11,42 +11,43 @@ const router = express.Router();
 /**
  * @swagger
  * tags:
- *   name: Hội thoại
+ *   name: Conversations
  *   description: API enpoints liên quan đến hội thoại và nhắn tin
  */
 // Xem danh sách các mail từ một người chơi khác
 /**
  * @swagger
- * /conversation/get-list-conversations:
+ * /conversation/get_list_conversation:
  *   get:
  *     summary: Xem mail
  *     description: Xem danh sách các mail từ một người chơi khác
  *     tags:
  *       - Conversations
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               index:
- *                 type: string
- *               count:
- *                 type: string
- *             required: true
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: index
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: count
+ *         schema:
+ *           type: string
  *     responses:
  *       200:
  *         description: Truy xuất thành công
  */
-router.get('/get-list-conversations', verifyToken, wrapAsync(async (req, res) => {
-  const { index, count } = req.body;
+router.get('/get_list_conversation', verifyToken, wrapAsync(async (req, res) => {
+  // const { index, count } = req.body || req.query;
+  const index = req.body.index || req.query.index;
+  const count = req.body.count || req.query.count;
   if (!index || !count) throw new ParameterError(ParameterErrorType.NOT_ENOUGH);
   if (typeof index !== 'string' && typeof count !== 'string') throw new ParameterError(ParameterErrorType.INVALID_TYPE);
 
   const userId = req.userId;
   const query = `
-    SELECT m.content, m.id, m.created, m.unread, m.sender_id, u.username as username, u.avatar as avatar
+    SELECT m.content, m.id, m.createdmessages, m.unread, m.sender_id, u.username as username, u.avatar as avatar
     FROM messages m
     JOIN conversations c ON m.conversation_id = c.id
     JOIN users u ON m.sender_id = u.id
@@ -54,8 +55,12 @@ router.get('/get-list-conversations', verifyToken, wrapAsync(async (req, res) =>
     AND m.sender_id != ${userId}
     LIMIT ${Number(count)} OFFSET ${Number(index)};
   `;
+  console.log(query);
   connection.query(query, (error, results) => {
-    if (error) return callRes(res, responseError.UNKNOWN_ERROR, null);
+    if (error) {
+      console.log(error);
+      return callRes(res, responseError.UNKNOWN_ERROR, null);
+    }
     const data = results.map(result => {
       const { id: message_id, content, created, unread, sender_id: partner_id, username, avatar } = result;
       return { message_id, content, created: String(created), unread: String(unread), partner_id, username, avatar };
@@ -67,7 +72,7 @@ router.get('/get-list-conversations', verifyToken, wrapAsync(async (req, res) =>
 // Xem danh sách các mail mới nhất từ người chơi còn lại
 /**
  * @swagger
- * /conversation/get-conversation-detail:
+ * /conversation/get_conversation_detail:
  *   get:
  *     summary: Xem mail của ngiời khác
  *     description: Xem danh sách các mail mới nhất từ người chơi còn lại
@@ -93,7 +98,7 @@ router.get('/get-list-conversations', verifyToken, wrapAsync(async (req, res) =>
  *       200:
  *         description: Truy xuất thành công
  */
-router.get('/get-conversation-detail', verifyToken, wrapAsync(async (req, res) => {
+router.get('/get_conversation_detail', verifyToken, wrapAsync(async (req, res) => {
   const { partner_id, index, count, conversation_id } = req.body;
   if (!index || !count || (!partner_id && !conversation_id)) throw new ParameterError(ParameterErrorType.NOT_ENOUGH);
   if (typeof index !== 'string' || typeof count !== 'string' || (typeof partner_id !== 'string' && typeof conversation_id !== 'string')) throw new ParameterError(ParameterErrorType.INVALID_TYPE);
@@ -127,7 +132,7 @@ router.get('/get-conversation-detail', verifyToken, wrapAsync(async (req, res) =
 // Xoá danh sách các mail từ một người chơi khác
 /**
  * @swagger
- * /conversation/delete-conversation:
+ * /conversation/delete_conversation:
  *   post:
  *     summary: Xoá mail
  *     description: Xoá danh sách các mail từ một người chơi khác
@@ -149,7 +154,7 @@ router.get('/get-conversation-detail', verifyToken, wrapAsync(async (req, res) =
  *       200:
  *         description: Xoá thành công
  */
-router.post('/delete-conversation', verifyToken, wrapAsync(async (req, res) => {
+router.post('/delete_conversation', verifyToken, wrapAsync(async (req, res) => {
   const { partner_id, conversation_id } = req.body;
   if (!partner_id && !conversation_id) throw new ParameterError(ParameterErrorType.NOT_ENOUGH);
   if (typeof partner_id !== 'string' && typeof conversation_id !== 'string') throw new ParameterError(ParameterErrorType.INVALID_TYPE);
@@ -187,7 +192,7 @@ router.post('/delete-conversation', verifyToken, wrapAsync(async (req, res) => {
 // Xoá mail từ một người chơi khác
 /**
  * @swagger
- * /conversation/delete-message:
+ * /conversation/delete_message:
  *   post:
  *     summary: Xoá mail của người khác
  *     description: Xoá mail từ một người chơi khác
@@ -209,7 +214,7 @@ router.post('/delete-conversation', verifyToken, wrapAsync(async (req, res) => {
  *       200:
  *         description: Xoá thành công
  */
-router.post('/delete-message', verifyToken, wrapAsync(async (req, res) => {
+router.post('/delete_message', verifyToken, wrapAsync(async (req, res) => {
   const { conversation_id, message_id } = req.body;
   if (!conversation_id || !message_id) throw new ParameterError(ParameterErrorType.NOT_ENOUGH);
   if (typeof conversation_id !== 'string' && typeof message_id !== 'string') throw new ParameterError(ParameterErrorType.INVALID_TYPE);

@@ -9,7 +9,7 @@ const router = express.Router();
 /**
  * @swagger
  * tags:
- *   name: Thông báo đẩy
+ *   name: Pushs
  *   description: API enpoints liên quan đến thông báo đẩy
  */
 
@@ -47,7 +47,7 @@ router.post('/set-push-setting', verifyToken, wrapAsync(async (req, res) => {
 
   const query = `
   INSERT INTO push (new_roommate, new_room, news) 
-  VALUES (${new_roommate}, ${new_room}, ${news});
+  VALUES ('${new_roommate}', '${new_room}', '${news}');
   `;
   connection.query(query, (error, result) => {
     if (error) return callRes(res, responseError.UNKNOWN_ERROR, null);
