@@ -46,8 +46,10 @@ const JWT_SECRET = process.env.JWT_SECRET;
  *             properties:
  *               username:
  *                 type: string
+ *                 example: user3
  *               password:
  *                 type: string
+ *                 example: 3
  *             required: true
  *     responses:
  *       200:
@@ -99,10 +101,13 @@ router.post('/signup', async (req, res) => {
  *             properties:
  *               username:
  *                 type: string
+ *                 example: admin3
  *               password:
  *                 type: string
+ *                 example: 3
  *               uuid:
  *                 type: string
+ *                 example: 50-81-40-85-D1-9C
  *             required: true
  *     responses:
  *       200:
@@ -265,8 +270,10 @@ router.post('/logout', async (req, res) => {
  *                 format: binary
  *               username:
  *                 type: string
+ *                 example: user3a
  *               email:
  *                 type: string
+ *                 example: user3a@gmail.com
  *     responses:
  *       200:
  *         description: Thông tin đã được cập nhật thành công

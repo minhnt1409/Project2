@@ -41,11 +41,13 @@ const now = moment(); // Lấy ra đối tượng moment hiện tại
  *         name: index
  *         schema:
  *           type: integer
+ *           example: 0
  *         description: Vị trí bắt đầu của danh sách phòng (mặc định là 0)
  *       - in: query
  *         name: count
  *         schema:
  *           type: integer
+ *           example: 3
  *         description: Số lượng phòng cần lấy (mặc định là 20)
  *     responses:
  *       200:
@@ -86,6 +88,7 @@ router.get('/get_list_rooms', async (req, res) => {
  *         name: room_id
  *         schema:
  *           type: integer
+ *           example: 1
  *         description: ID của phòng
  *     responses:
  *       200:
@@ -153,8 +156,10 @@ router.get('/get_room', async (req, res) => {
  *             properties:
  *               room_name:
  *                 type: string
+ *                 example: room4
  *               max:
  *                 type: integer
+ *                 example: 10
  *     responses:
  *       200:
  *         description: Thông tin của phòng mới được tạo
@@ -238,10 +243,13 @@ router.post('/add_room', async (req, res) => {
  *             properties:
  *               room_id:
  *                 type: integer
+ *                 example: 4
  *               room_name:
  *                 type: string
+ *                 example: room4a
  *               max:
  *                 type: integer
+ *                 example: 15
  *     responses:
  *       200:
  *         description: Thông tin của phòng đã được chỉnh sửa
