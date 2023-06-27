@@ -144,6 +144,7 @@ const JWT_SECRET = 'maBiMat';
  *     parameters:
  *       - in: query
  *         name: message_id
+ *         example: 2
  *         schema:
  *           type: string
  *         description: id của thông báo

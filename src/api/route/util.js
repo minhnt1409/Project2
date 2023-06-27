@@ -393,16 +393,19 @@ router.get('/get_list_task', verifyToken , wrapAsync(async(req, res) => {
  *         name: user_id
  *         schema:
  *           type: string
+ *           example: 3
  *         description: ID người dùng (mặc định là ID của người dùng đang xác thực)
  *       - in: query
  *         name: index
  *         schema:
  *           type: integer
+ *           example: 0
  *         description: Vị trí bắt đầu của danh sách phòng (mặc định là 0)
  *       - in: query
  *         name: count
  *         schema:
  *           type: integer
+ *           example: 3
  *         description: Số lượng phòng cần lấy (mặc định là 20)
  *     responses:
  *       200:
@@ -482,11 +485,13 @@ router.get('/get_survey' ,verifyToken, wrapAsync(async(req, res) => {
  *         name: id
  *         schema:
  *           type: string
+ *           example: 1
  *         description: id của form khảo sát
  *       - in: query
  *         name: option
  *         schema:
  *           type: string
+ *           example: 1
  *         description: option mà user đã chọn nếu type là 0
  *     responses:
  *       200:
@@ -512,8 +517,8 @@ router.post('/submit_survey' , verifyToken, wrapAsync(async(req, res) => {
  * @swagger
  * /util/update_position:
  *   post:
- *     summary: Lấy form khảo sát
- *     description: Lấy form khảo sát dựa theo token người chơi
+ *     summary: Gửi thông tin tọa độ
+ *     description: Làm mới thông tin tọa độ
  *     tags:
  *       - Utils
  *     security:
@@ -523,10 +528,11 @@ router.post('/submit_survey' , verifyToken, wrapAsync(async(req, res) => {
  *         name: position
  *         schema:
  *           type: string
+ *           example: 1-2-3
  *         description: Tọa độ của người chơi
  *     responses:
  *       200:
- *         description: Lấy điểm thành công
+ *         description: Update thông tin tọa độ thành công
  */
 router.post('/update_position' , verifyToken, wrapAsync(async(req, res) => {
     const position = req.body.position || req.query.position;
