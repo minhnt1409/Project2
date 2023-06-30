@@ -14,7 +14,7 @@ $ npm start
 ```
 
 ## Run server
-đổi user password và database trong file connect.js
+đổi user password và database trong file .env
 
 copy file database.sql chạy trên mysql workbench 
 
